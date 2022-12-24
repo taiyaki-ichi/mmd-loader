@@ -204,4 +204,122 @@ namespace mmdl
 
 	};
 
+	// ボーン
+	// pmx_header.bone_index_sizeは1,2,4の値をとるので、最大値に対応したuint32_tをデフォルトに指定
+	template<typename Str, typename Vec3, template<typename> typename Container, typename BoneIndex = std::uint32_t>
+	struct pmx_bone
+	{
+		// ボーンの名前
+		Str name;
+
+		// ボーンの英語の名前
+		Str english_name;
+
+		// 位置
+		Vec3 position;
+		// 親ボーンのインデックス
+		BoneIndex parent_index;
+		// 変形階層
+		std::int32_t trannsformation_level;
+
+		enum class bone_flag
+		{
+			// 接続先法事方法
+			// false: 座標オフセットで指定
+			// true: ボーンで指定
+			access_point,
+
+			// 回転可能かどうか
+			rotatable,
+
+			// 移動可能かどうか
+			movable,
+
+			// 表示
+			// WARNING; 表示可能かどうかという意味か?
+			display,
+
+			// 操作可能かどうか
+			operable,
+
+			// IK使うかどうか
+			ik,
+
+			// ローカル付与
+			// false: ユーザー変形値／IKリンク／多重付与
+			// true: 親のローカル変形量
+			local_grant,
+
+			// 回転付与
+			rotation_grant,
+
+			// 移動付与
+			move_grant,
+
+			// 軸固定かどうか
+			fix_axis,
+
+			// ローカル軸かどうか
+			local_axis,
+
+			// 物理後変形かどうか
+			post_physical_deformation,
+
+			// 外部親変形かどうか
+			external_parent_deformation,
+
+		};
+
+		// WARNING: マジックナンバー
+		std::bitset<16> bone_flag_bits;
+
+		// bone_flag_bits[access_point]=falseのとき使用
+		// ボーンの位置からの相対的な位置を表す
+		Vec3 access_point_offset;
+		// bone_flag_bits[access_point]=tureのとき使用
+		// 接続先のボーンのインデックスを表す
+		BoneIndex access_point_index;
+
+		// bone_flag_bits[rotation_grant]=trueまたは bone_flag_bits[move_grant]=trueのとき使用
+		// 対象のボーンを表す
+		BoneIndex grant_index;
+		// 付与率
+		Vec3 grant_rate;
+
+		// bone_flag_bits[fix_axis]=trueの時に使用
+		// 固定された軸の方向ベクトル
+		Vec3 fix_axis_direction;
+
+		// bone_flag_bits[local_axis]=trueの時に使用
+		// x軸の方向ベクトル
+		Vec3 local_axis_x;
+		// z軸の方向ベクトル
+		Vec3 local_axis_z;
+
+		// bone_flag_bits[external_parent_deformation]=trueの時に使用
+		// Keyの値
+		std::int16_t external_parent_deformation_key;
+
+		// bone_flag_bits[ik]=trueの時に使用
+		//IKのターゲットのボーン
+		BoneIndex ik_target_bone;
+		// IKのループ回数
+		std::int16_t ik_roop_number;
+		// IKのループを行う際の1回当たりの制限角度（ラジアン）
+		float ik_rook_angle;
+
+		struct ik_link {
+			// リンクしているボーン
+			BoneIndex bone;
+
+			// 角度制限を行う場合の最小、最大の角度の制限
+			std::optional<std::pair<Vec3, Vec3>> min_max_angle_limit;
+		};
+
+		Container<ik_link> ik_link;
+
+
+		// TODO: 「 bone_flag_bits[-]=trueの時に使用」って書いてあるとこはOptionalでイイかも
+	};
+
 }
