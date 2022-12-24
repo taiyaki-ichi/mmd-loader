@@ -106,4 +106,13 @@ namespace mmdl
 		float edge_magnification;
 
 	};
+
+
+	// 面を構成する頂点の情報
+	// 3つで一つの三角形の面を表す
+	// pmx_header.vertex_index_sizeは1,2,4の値をとるので、最大値に対応したuint32_tをデフォルトに指定
+	// WARNING: いらないかも
+	template<typename VertexIndex = std::uint32_t>
+	using pmx_surface = VertexIndex;
+
 }
