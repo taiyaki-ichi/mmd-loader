@@ -2,6 +2,7 @@
 #include<utility>
 #include<array>
 #include<optional>
+#include<bitset>
 
 namespace mmdl
 {
@@ -114,5 +115,93 @@ namespace mmdl
 	// WARNING: いらないかも
 	template<typename VertexIndex = std::uint32_t>
 	using pmx_surface = VertexIndex;
+
+
+	// マテリアル
+	// pmx_header.texture_index_sizeは1,2,4の値をとるので、最大値に対応したuint32_tをデフォルトに指定
+	template<typename Str, typename Vec3, typename Vec4, typename TextureIndex = std::uint32_t>
+	struct pmx_material
+	{
+		// マテリアルの名前
+		Str name;
+
+		// マテリアルの英語の名前
+		Str english_name;
+
+		// ディフューズ
+		Vec4 diffuse;
+		// スぺキュラ
+		Vec3 specular;
+		// スぺキュラ係数
+		float specularity;
+		// アンビエント
+		Vec3 ambient;
+
+		enum class draw_flag
+		{
+			// 片面の描画を行うかどうか
+			single_sided,
+
+			// 地面に影を落とすかどうか
+			grond_shadow,
+
+			// セルフシャドウマップへ描画するかどうか
+			// WARNING: 名前分かりにくい
+			draw_to_self_shadow_map,
+
+			// セルフシャドウを描画するかどうか
+			// WARNING: 名前分かりにくい
+			draw_self_shadow,
+
+			// エッジを描画するかどうか
+			draw_edge,
+		};
+
+		// 描画のオプション
+		// WARNING: マジックナンバー
+		std::bitset<5> draw_flag_bits;
+
+		// エッジの色
+		Vec4 edge_color;
+		// エッジの大きさ
+		float edge_size;
+
+		// 通常のテクスチャのテクスチャテーブルの参照インデックス
+		TextureIndex normal_texture_index;
+		// スフィアテクスチャのテクスチャテーブルの参照インデックス
+		TextureIndex sphere_texture_index;
+
+		enum class sphere_mode
+		{
+			// 何もなし
+			none,
+
+			// 乗算
+			sph,
+
+			// 加算
+			spa,
+
+			// サブテクスチャ
+			// 追加UV1のx,yをUV参照して通常テクスチャ描画を行う
+			subtexture,
+		};
+
+		sphere_mode sphere_mode_value;
+
+
+		// toon_flag=0の時、toon_textureはToonテクスチャのテクスチャテーブルの参照インデックス
+		// toon_flag=1の時、共有テクスチャのインデックス（0から9までの値）（0ならtoon01.bmp,1ならtoon02.bmpのように対応）
+		std::uint8_t toon_flag;
+		TextureIndex toon_texture;
+
+		// メモ、自由欄
+		Str memo;
+
+		// 材質に対応する頂点の数
+		// 必ず3の倍数になる
+		std::int32_t vertex_number;
+
+	};
 
 }
