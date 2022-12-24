@@ -45,6 +45,12 @@ namespace mmdl
 		// 1,2,4のいずれか
 		std::uint8_t rigid_body_index_size;
 
+		// 「1,2,4のいずれか」について
+		// 1: 1byteのunsigned
+		// 2: 2byteのunsigned
+		// 4: 4byteのsigned
+		// となるので注意
+
 	};
 
 
@@ -70,9 +76,9 @@ namespace mmdl
 
 	// 1頂点情報
 	// ボーンのインデックスの大きさについて、pmx_header.bone_index_sizeは1,2,4の値をとる
-	// その最大の値である4の大きさに対応したstd::uint32_tをデフォルトとして使用する
+	// その最大の値である4の大きさに対応したstd::int32_tをデフォルトとして使用する
 	template<typename Vec2, typename Vec3, typename Vec4, template<typename> typename Container,
-		typename BoneIndex = std::uint32_t>
+		typename BoneIndex = std::int32_t>
 		struct pmx_vertex
 	{
 		// 頂点座標
@@ -111,15 +117,15 @@ namespace mmdl
 
 	// 面を構成する頂点の情報
 	// 3つで一つの三角形の面を表す
-	// pmx_header.vertex_index_sizeは1,2,4の値をとるので、最大値に対応したuint32_tをデフォルトに指定
+	// pmx_header.vertex_index_sizeは1,2,4の値をとるので、最大値に対応したint32_tをデフォルトに指定
 	// WARNING: いらないかも
-	template<typename VertexIndex = std::uint32_t>
+	template<typename VertexIndex = std::int32_t>
 	using pmx_surface = VertexIndex;
 
 
 	// マテリアル
-	// pmx_header.texture_index_sizeは1,2,4の値をとるので、最大値に対応したuint32_tをデフォルトに指定
-	template<typename Str, typename Vec3, typename Vec4, typename TextureIndex = std::uint32_t>
+	// pmx_header.texture_index_sizeは1,2,4の値をとるので、最大値に対応したint32_tをデフォルトに指定
+	template<typename Str, typename Vec3, typename Vec4, typename TextureIndex = std::int32_t>
 	struct pmx_material
 	{
 		// マテリアルの名前
@@ -205,8 +211,8 @@ namespace mmdl
 	};
 
 	// ボーン
-	// pmx_header.bone_index_sizeは1,2,4の値をとるので、最大値に対応したuint32_tをデフォルトに指定
-	template<typename Str, typename Vec3, template<typename> typename Container, typename BoneIndex = std::uint32_t>
+	// pmx_header.bone_index_sizeは1,2,4の値をとるので、最大値に対応したint32_tをデフォルトに指定
+	template<typename Str, typename Vec3, template<typename> typename Container, typename BoneIndex = std::int32_t>
 	struct pmx_bone
 	{
 		// ボーンの名前
