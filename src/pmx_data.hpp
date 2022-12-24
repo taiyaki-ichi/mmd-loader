@@ -13,6 +13,8 @@ namespace mmdl
 	};
 
 	// pmxヘッダ
+	// Dataはpmx2.0ではサイズは8固定
+	template<typename Data = std::int64_t>
 	struct pmx_header
 	{
 		// バージョン
@@ -23,27 +25,31 @@ namespace mmdl
 
 		// 頂点の追加UVの数
 		// 1,2,4のいずれか
-		std::uint8_t add_uv_number;
+		Data add_uv_number;
 
 		// 頂点のインデックスの大きさ
 		// 1,2,4のいずれか
-		std::uint8_t vertex_index_size;
+		Data vertex_index_size;
 
 		// テクスチャのインデックスの大きさ
 		// 1,2,4のいずれか
-		std::uint8_t texture_index_size;
+		Data texture_index_size;
 
 		// マテリアルのインデックスの大きさ
 		// 1.2.4のいずれか
-		std::uint8_t material_index_size;
+		Data material_index_size;
 
 		// ボーンのインデックスの大きさ
 		// 1,2,4のいずれか
-		std::uint8_t bone_index_size;
+		Data bone_index_size;
+
+		// モー負のインデックスの大きさ
+		// 1,2,4のいずれか
+		Data morph_index_size;
 
 		// リジットボディのインデックスの大きさ
 		// 1,2,4のいずれか
-		std::uint8_t rigid_body_index_size;
+		Data rigid_body_index_size;
 
 		// 「1,2,4のいずれか」について
 		// 1: 1byteのunsigned
