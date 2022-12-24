@@ -4,7 +4,9 @@
 
 namespace mmdl
 {
-	template<typename Data = std::int64_t>
+	// ヘッダの読み込み
+	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
+	template<typename Data = std::uint8_t>
 	inline pmx_header<Data> load_header(std::istream& in)
 	{
 		pmx_header<Data> result;
