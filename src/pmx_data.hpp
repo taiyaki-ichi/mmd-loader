@@ -9,7 +9,7 @@ namespace mmdl
 		utf8,
 	};
 
-	// PMXヘッダ
+	// pmxヘッダ
 	struct pmx_header
 	{
 		// バージョン
@@ -41,6 +41,25 @@ namespace mmdl
 		// リジットボディのインデックスの大きさ
 		// 1,2,4のいずれか
 		std::uint8_t rigid_body_index_size;
+
+	};
+
+
+	// モデルの名前とその他の情報
+	template<typename Str>
+	struct pmx_info
+	{
+		// モデルの名前
+		Str model_name;
+
+		// モデルの英語名
+		Str english_mode_name;
+
+		// コメント
+		Str comment;
+
+		// 英語のコメント
+		Str english_comment;
 
 	};
 
