@@ -37,4 +37,34 @@ namespace mmdl
 
 		return result;
 	}
+
+	template<typename Str>
+	inline pmx_info<Str> load_info(std::istream& in)
+	{
+		pmx_info<Str> result;
+
+		std::int32_t len;
+
+		// モデル名の取得
+		read_from_istream(in, &len);
+		result.model_name.resize(len);
+		read_from_istream(in, &result.model_name[0], len);
+
+		// モデルの英語名の取得
+		read_from_istream(in, &len);
+		result.model_name.resize(len);
+		read_from_istream(in, &result.english_mode_name[0], len);
+
+		// コメントの取得
+		read_from_istream(in, &len);
+		result.comment.resize(len);
+		read_from_istream(in, &result.comment[0], len);
+
+		// 英語のコメントの取得
+		read_from_istream(in, &len);
+		result.english_comment.resize(len);
+		read_from_istream(in, &result.english_comment[0], len);
+
+		return result;
+	}
 }
