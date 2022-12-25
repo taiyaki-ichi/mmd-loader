@@ -1,12 +1,14 @@
 #pragma once
 #include"pmx_data.hpp"
 #include"utility.hpp"
+#include"generics_type.hpp"
+#include<concepts>
 
 namespace mmdl
 {
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
-	template<typename Data = std::uint8_t>
+	template<std::integral Data = std::uint8_t>
 	inline pmx_header<Data> load_header(std::istream& in)
 	{
 		pmx_header<Data> result;
@@ -39,7 +41,8 @@ namespace mmdl
 	}
 
 	template<typename Str>
-	inline pmx_info<Str> load_info(std::istream& in)
+	requires resizable_container<Str, decltype(0)>
+		inline pmx_info<Str> load_info(std::istream& in)
 	{
 		pmx_info<Str> result;
 
