@@ -83,9 +83,8 @@ namespace mmdl
 	// 1頂点情報
 	// ボーンのインデックスの大きさについて、pmx_header.bone_index_sizeは1,2,4の値をとる
 	// その最大の値である4の大きさに対応したstd::int32_tをデフォルトとして使用する
-	template<typename Vec2, typename Vec3, typename Vec4, template<typename> typename Container,
-		typename BoneIndex = std::int32_t>
-		struct pmx_vertex
+	template<typename Vec2, typename Vec3, typename Vec4, typename BoneIndex = std::int32_t>
+	struct pmx_vertex
 	{
 		// 頂点座標
 		Vec3 position;
