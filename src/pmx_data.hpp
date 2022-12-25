@@ -6,10 +6,12 @@
 
 namespace mmdl
 {
+	// エンコードのタイプ
+	// 対応する整数は1文字の大きさ
 	enum class encode_type
 	{
-		utf16,
-		utf8,
+		utf16 = 2,
+		utf8 = 1,
 	};
 
 	// pmxヘッダ

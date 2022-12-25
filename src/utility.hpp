@@ -1,5 +1,6 @@
 #pragma once
 #include<istream>
+#include"generics_type.hpp"
 
 namespace mmdl
 {
@@ -43,6 +44,16 @@ namespace mmdl
 			read_from_istream(s, &result64);
 			*out = static_cast<T>(result64);
 			break;
+		}
+	}
+
+	template<typename T, typename U>
+	requires resizable_container<T, U>
+		void read_str_from_istream(std::istream& in, T* out, U str_len, U char_size)
+	{
+		for (U i = 0; i < str_len; i++)
+		{
+			read_from_istream(in, &resizable_container_traits<T, U>::get(*out, i), char_size);
 		}
 	}
 }

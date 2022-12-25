@@ -37,6 +37,7 @@ namespace mmdl
 	template<typename T, typename U>
 	concept resizable_container = requires(T & t, U u)
 	{
+		typename resizable_container_traits<T, U>::value_type;
 		resizable_container_traits<T, U>::resize(t, u);
 		resizable_container_traits<T, U>::get(t, u);
 	};

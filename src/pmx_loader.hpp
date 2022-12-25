@@ -42,31 +42,32 @@ namespace mmdl
 
 	template<typename Str>
 	requires resizable_container<Str, decltype(0)>
-		pmx_info<Str> load_info(std::istream& in)
+		pmx_info<Str> load_info(std::istream& in, encode_type encode)
 	{
 		pmx_info<Str> result;
 
 		std::int32_t len;
+		std::int32_t char_size = static_cast<std::int32_t>(encode);
 
 		// モデル名の取得
 		read_from_istream(in, &len);
-		result.model_name.resize(len);
-		read_from_istream(in, &result.model_name[0], len);
+		result.model_name.resize(len / char_size);
+		read_str_from_istream(in, &result.model_name, len / char_size, char_size);
 
 		// モデルの英語名の取得
 		read_from_istream(in, &len);
-		result.model_name.resize(len);
-		read_from_istream(in, &result.english_mode_name[0], len);
+		result.english_mode_name.resize(len / char_size);
+		read_str_from_istream(in, &result.english_mode_name, len / char_size, char_size);
 
 		// コメントの取得
 		read_from_istream(in, &len);
-		result.comment.resize(len);
-		read_from_istream(in, &result.comment[0], len);
+		result.comment.resize(len / char_size);
+		read_str_from_istream(in, &result.comment, len / char_size, char_size);
 
 		// 英語のコメントの取得
 		read_from_istream(in, &len);
-		result.english_comment.resize(len);
-		read_from_istream(in, &result.english_comment[0], len);
+		result.english_comment.resize(len / char_size);
+		read_str_from_istream(in, &result.english_comment, len / char_size, char_size);
 
 		return result;
 	}
