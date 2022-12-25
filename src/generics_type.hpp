@@ -43,5 +43,60 @@ namespace mmdl
 	};
 
 
+	// 2次元ベクトルが構築可能であることを表すトレイツ
+	template<typename T>
+	requires std::constructible_from<T, float, float>&& std::move_constructible<T>
+		struct constructible_vec2_traits
+	{
+		static T construct(float x, float y)
+		{
+			return T(x, y);
+		}
+	};
+
+	// 構築可能な2次元ベクトルのコンセプト
+	template<typename T>
+	concept constructible_vec2 = requires
+	{
+		constructible_vec2_traits<T>::construct(std::declval<float>(), std::declval<float>());
+	};
+
+
+	// 3次元ベクトルが構築可能であることを表すトレイツ
+	template<typename T>
+	requires std::constructible_from<T, float, float, float>&& std::move_constructible<T>
+		struct constructible_vec3_traits
+	{
+		static T construct(float x, float y, float z)
+		{
+			return T(x, y, z);
+		}
+	};
+
+	// 構築可能な3次元ベクトルのコンセプト
+	template<typename T>
+	concept constructible_vec3 = requires
+	{
+		constructible_vec3_traits<T>::construct(std::declval<float>(), std::declval<float>(), std::declval<float>());
+	};
+
+
+	// 4次元ベクトルが構築可能であることを表すトレイツ
+	template<typename T>
+	requires std::constructible_from<T, float, float, float, float>&& std::move_constructible<T>
+		struct constructible_vec4_traits
+	{
+		static T construct(float x, float y, float z, float w)
+		{
+			return T(x, y, z, w);
+		}
+	};
+
+	// 構築可能な4次元ベクトルのコンセプト
+	template<typename T>
+	concept constructible_vec4 = requires
+	{
+		constructible_vec4_traits<T>::construct(std::declval<float>(), std::declval<float>(), std::declval<float>(), std::declval<float>());
+	};
 
 }

@@ -23,6 +23,7 @@ struct vec4
 
 int main()
 {
+	
 	{
 		const wchar_t* file_path = L"../../3dmodel/ƒpƒCƒ‚ƒ“/”h–Ö.pmx";
 		std::ifstream file{ file_path ,std::ios::binary };
@@ -70,6 +71,6 @@ int main()
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 	}
-
+	
 	return 0;
 }

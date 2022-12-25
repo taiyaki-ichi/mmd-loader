@@ -74,7 +74,7 @@ namespace mmdl
 
 
 	// 頂点情報の読み込み
-	template<template<typename> typename Container, typename Vec2, typename Vec3, typename Vec4, typename BoneIndex = std::int32_t, typename  HeaderData = std::uint8_t>
+	template<template<typename> typename Container, constructible_vec2 Vec2, constructible_vec3 Vec3, constructible_vec4 Vec4, typename BoneIndex = std::int32_t, typename  HeaderData = std::uint8_t>
 	requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, BoneIndex>&& resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::int32_t>
 		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
 	{
@@ -88,16 +88,14 @@ namespace mmdl
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < result.size(); i++)
 		{
-			// TODO: 型制約をつける時に初期化方法を考える
-			read_from_istream(in, &result[i].position);
-			read_from_istream(in, &result[i].normal);
-			read_from_istream(in, &result[i].uv);
+			read_vec3_from_istream(in, &result[i].position);
+			read_vec3_from_istream(in, &result[i].normal);
+			read_vec2_from_istream(in, &result[i].uv);
 
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				// TODO: 型制約をつける時に初期化方法を考える
-				read_from_istream(in, &result[i].additional_uv[j]);
+				read_vec4_from_istream(in, &result[i].additional_uv[j]);
 			}
 
 			// ウェイト変形方式の取得
