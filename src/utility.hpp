@@ -16,7 +16,7 @@ namespace mmdl
 	}
 
 	template<typename T, typename U>
-	void read_intanger(std::istream& s, T* out, U size)
+	void read_intanger_from_istream(std::istream& s, T* out, U size)
 	{
 		switch (size)
 		{

@@ -8,10 +8,10 @@ namespace mmdl
 {
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
-	template<std::integral Data = std::uint8_t>
-	pmx_header<Data> load_header(std::istream& in)
+	template<std::integral HeaderData = std::uint8_t>
+	pmx_header<HeaderData> load_header(std::istream& in)
 	{
-		pmx_header<Data> result;
+		pmx_header<HeaderData> result;
 
 		// 最初の4文字はいらない「Pmx 」の文字
 		in.seekg(4);
@@ -25,17 +25,17 @@ namespace mmdl
 		// WARNING: ここだけbitっぽい?
 		size /= 8;
 
-		Data encode;
-		read_intanger<Data>(in, &encode, size);
+		HeaderData encode;
+		read_intanger_from_istream<HeaderData>(in, &encode, size);
 		result.encode = encode == 0 ? encode_type::utf16 : encode_type::utf8;
-		read_intanger(in, &result.add_uv_number, size);
+		read_intanger_from_istream(in, &result.add_uv_number, size);
 
-		read_intanger(in, &result.vertex_index_size, size);
-		read_intanger(in, &result.texture_index_size, size);
-		read_intanger(in, &result.material_index_size, size);
-		read_intanger(in, &result.bone_index_size, size);
-		read_intanger(in, &result.morph_index_size, size);
-		read_intanger(in, &result.rigid_body_index_size, size);
+		read_intanger_from_istream(in, &result.vertex_index_size, size);
+		read_intanger_from_istream(in, &result.texture_index_size, size);
+		read_intanger_from_istream(in, &result.material_index_size, size);
+		read_intanger_from_istream(in, &result.bone_index_size, size);
+		read_intanger_from_istream(in, &result.morph_index_size, size);
+		read_intanger_from_istream(in, &result.rigid_body_index_size, size);
 
 		return result;
 	}
@@ -74,9 +74,9 @@ namespace mmdl
 
 	// 頂点情報の読み込み
 	template<template<typename> typename Container, typename Vec2, typename Vec3, typename Vec4,
-		typename BoneIndex = std::int32_t,typename  Data= std::uint8_t>
+		typename BoneIndex = std::int32_t,typename  HeaderData= std::uint8_t>
 		requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, BoneIndex> && resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::int32_t>
-		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, Data add_uv_number, Data bone_index_size)
+		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
 	{
 		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> result;
 
@@ -108,15 +108,15 @@ namespace mmdl
 			{
 			// BDEF1の場合
 			case 0:
-				read_intanger(in, &result[i].bone[0], bone_index_size);
+				read_intanger_from_istream(in, &result[i].bone[0], bone_index_size);
 				// 単一のボーンの重みが1であることを示す
 				result[i].weight[0] = 1.f;
 				break;
 
 			// BDEF2の場合
 			case 1:
-				read_intanger(in, &result[i].bone[0], bone_index_size);
-				read_intanger(in, &result[i].bone[1], bone_index_size);
+				read_intanger_from_istream(in, &result[i].bone[0], bone_index_size);
+				read_intanger_from_istream(in, &result[i].bone[1], bone_index_size);
 				read_from_istream(in, &result[i].weight[0]);
 				// 2本のボーンの重みは合計1になる
 				result[i].weight[1] = 1.f - result[i].weight[0];
@@ -126,7 +126,7 @@ namespace mmdl
 			case 2:
 				// 4つのボーンのインデックスの取得
 				for (std::size_t j = 0; j < 4; j++)
-					read_intanger(in, &result[i].bone[j], bone_index_size);
+					read_intanger_from_istream(in, &result[i].bone[j], bone_index_size);
 				// 4つのボーンの重みの取得
 				for (std::size_t j = 0; j < 4; j++)
 					read_from_istream(in, &result[i].weight[j]);
@@ -134,8 +134,8 @@ namespace mmdl
 
 			// SDEFの倍
 			case 3:
-				read_intanger(in, &result[i].bone[0], bone_index_size);
-				read_intanger(in, &result[i].bone[1], bone_index_size);
+				read_intanger_from_istream(in, &result[i].bone[0], bone_index_size);
+				read_intanger_from_istream(in, &result[i].bone[1], bone_index_size);
 				read_from_istream(in, &result[i].weight[0]);
 				// ここまでBDEF2と同じ
 				std::array<Vec3, 3> sdef;
