@@ -42,7 +42,7 @@ namespace mmdl
 
 	template<typename Str>
 	requires resizable_container<Str, decltype(0)>
-	pmx_info<Str> load_info(std::istream& in)
+		pmx_info<Str> load_info(std::istream& in)
 	{
 		pmx_info<Str> result;
 
@@ -73,9 +73,8 @@ namespace mmdl
 
 
 	// 頂点情報の読み込み
-	template<template<typename> typename Container, typename Vec2, typename Vec3, typename Vec4,
-		typename BoneIndex = std::int32_t,typename  HeaderData= std::uint8_t>
-		requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, BoneIndex> && resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::int32_t>
+	template<template<typename> typename Container, typename Vec2, typename Vec3, typename Vec4, typename BoneIndex = std::int32_t, typename  HeaderData = std::uint8_t>
+	requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, BoneIndex>&& resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::int32_t>
 		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
 	{
 		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> result;
@@ -106,14 +105,14 @@ namespace mmdl
 
 			switch (weight_type)
 			{
-			// BDEF1の場合
+				// BDEF1の場合
 			case 0:
 				read_intanger_from_istream(in, &result[i].bone[0], bone_index_size);
 				// 単一のボーンの重みが1であることを示す
 				result[i].weight[0] = 1.f;
 				break;
 
-			// BDEF2の場合
+				// BDEF2の場合
 			case 1:
 				read_intanger_from_istream(in, &result[i].bone[0], bone_index_size);
 				read_intanger_from_istream(in, &result[i].bone[1], bone_index_size);
@@ -122,7 +121,7 @@ namespace mmdl
 				result[i].weight[1] = 1.f - result[i].weight[0];
 				break;
 
-			// BDEF4の場合
+				// BDEF4の場合
 			case 2:
 				// 4つのボーンのインデックスの取得
 				for (std::size_t j = 0; j < 4; j++)
@@ -132,7 +131,7 @@ namespace mmdl
 					read_from_istream(in, &result[i].weight[j]);
 				break;
 
-			// SDEFの倍
+				// SDEFの倍
 			case 3:
 				read_intanger_from_istream(in, &result[i].bone[0], bone_index_size);
 				read_intanger_from_istream(in, &result[i].bone[1], bone_index_size);
