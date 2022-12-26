@@ -130,6 +130,33 @@ namespace mmdl
 	using pmx_surface = VertexIndex;
 
 
+	// pmx_materialで使用
+	enum class sphere_mode
+	{
+		// 何もなし
+		none,
+
+		// 乗算
+		sph,
+
+		// 加算
+		spa,
+
+		// サブテクスチャ
+		// 追加UV1のx,yをUV参照して通常テクスチャ描画を行う
+		subtexture,
+	};
+
+	// pmx_materialで使用
+	enum class toon_type
+	{
+		// 共有
+		shared,
+
+		// 個別
+		unshared,
+	};
+
 	// マテリアル
 	// pmx_header.texture_index_sizeは1,2,4の値をとるので、最大値に対応したint32_tをデフォルトに指定
 	template<typename Str, typename Vec3, typename Vec4, typename TextureIndex = std::int32_t>
@@ -180,32 +207,16 @@ namespace mmdl
 		float edge_size;
 
 		// 通常のテクスチャのテクスチャテーブルの参照インデックス
-		TextureIndex normal_texture_index;
+		TextureIndex texture_index;
 		// スフィアテクスチャのテクスチャテーブルの参照インデックス
 		TextureIndex sphere_texture_index;
-
-		enum class sphere_mode
-		{
-			// 何もなし
-			none,
-
-			// 乗算
-			sph,
-
-			// 加算
-			spa,
-
-			// サブテクスチャ
-			// 追加UV1のx,yをUV参照して通常テクスチャ描画を行う
-			subtexture,
-		};
 
 		sphere_mode sphere_mode_value;
 
 
-		// toon_flag=0の時、toon_textureはToonテクスチャのテクスチャテーブルの参照インデックス
-		// toon_flag=1の時、共有テクスチャのインデックス（0から9までの値）（0ならtoon01.bmp,1ならtoon02.bmpのように対応）
-		std::uint8_t toon_flag;
+		// toon_type::unsharedの時、toon_textureはToonテクスチャのテクスチャテーブルの参照インデックス
+		// toon_type::sharedの時、共有テクスチャのインデックス（0から9までの値）（0ならtoon01.bmp,1ならtoon02.bmpのように対応）
+		toon_type toon_type_value;
 		TextureIndex toon_texture;
 
 		// メモ、自由欄

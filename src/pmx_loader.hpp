@@ -222,4 +222,124 @@ namespace mmdl
 
 		return result;
 	}
+
+	// マテリアルの読み込み
+	template<template<typename>typename Container, typename Str, constructible_vec3 Vec3, constructible_vec4 Vec4,
+		typename TextureIndex = std::int32_t, typename HeaderData = std::uint8_t, typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t>
+		requires resizable_container<Container<Str>, ContianerSizeType>&& resizable_container<Str, StrSizeType>
+	Container<pmx_material<Str, Vec3, Vec4, TextureIndex>> load_material(std::istream& in, encode_type encode, HeaderData texture_index_size)
+	{
+		using container_type = Container<pmx_material<Str, Vec3, Vec4, TextureIndex>>;
+		using container_traits = resizable_container_traits<container_type, ContianerSizeType>;
+		using str_traits = resizable_container_traits<Str, StrSizeType>;
+
+		container_type result;
+
+		// マテリアルの数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		// コンテナの大きさ指定
+		container_traits::resize(result, static_cast<container_traits::size_type>(num));
+
+		// 文字の大きさ
+		auto const char_size = static_cast<str_traits::size_type>(encode);
+
+		// それぞれのマテリアルの読み込み
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			// 読み込むマテリアル
+			auto& material = container_traits::get(result, static_cast<container_traits::size_type>(i));
+
+			// 文字列を読み込む際に使用
+			std::int32_t len;
+
+			// 名前
+			read_from_istream(in, &len);
+			str_traits::resize(material.name, static_cast<str_traits::size_type>(len / char_size));
+			read_array_from_istream(in, &material.name, len / char_size, char_size);
+
+			// 英語の名前
+			read_from_istream(in, &len);
+			str_traits::resize(material.english_name, static_cast<str_traits::size_type>(len / char_size));
+			read_array_from_istream(in, &material.english_name, len / char_size, char_size);
+
+			// 色情報
+			read_vec4_from_istream(in, &material.diffuse);
+			read_vec3_from_istream(in, &material.specular);
+			read_from_istream(in, &material.specularity);
+			read_vec3_from_istream(in, &material.ambient);
+
+			// 描画フラグ
+			std::uint8_t flag;
+			read_from_istream(in, &flag);
+			material.draw_flag_bits = { flag };
+
+			// エッジ
+			read_vec4_from_istream(in, &material.edge_color);
+			read_from_istream(in, &material.edge_size);
+
+			// テクスチャ
+			read_intanger_from_istream(in, &material.texture_index, texture_index_size);
+			read_intanger_from_istream(in, &material.sphere_texture_index, texture_index_size);
+
+			// スフィアモード
+			std::uint8_t sphere;
+			read_from_istream(in, &sphere);
+			switch (sphere)
+			{
+			// 無効
+			case 0:
+				material.sphere_mode_value = sphere_mode::none;
+				break;
+
+			// 乗算
+			case 1:
+				material.sphere_mode_value = sphere_mode::sph;
+				break;
+
+			// 加算
+			case 2:
+				material.sphere_mode_value = sphere_mode::spa;
+				break;
+
+			// サブテクスチャ
+			case 3:
+				material.sphere_mode_value = sphere_mode::subtexture;
+				break;
+			}
+
+			// トゥーン
+			std::uint8_t toon;
+			read_from_istream(in, &toon);
+			
+			switch (toon)
+			{
+			// 個別
+			case 0:
+				material.toon_type_value = toon_type::unshared;
+				read_from_istream(in, &material.toon_texture, texture_index_size);
+				break;
+
+			// 共有
+			case 1:
+				material.toon_type_value = toon_type::shared;
+				// 共有の場合のインデックスの場合のサイズは1byte
+				read_from_istream(in, &material.toon_texture, 1);
+				break;
+			}
+
+			// メモ
+			read_from_istream(in, &len);
+			str_traits::resize(material.memo, static_cast<str_traits::size_type>(len / char_size));
+			read_array_from_istream(in, &material.memo, len / char_size, char_size);
+
+			// 面の数
+			read_from_istream(in, &material.vertex_number);
+
+		}
+
+		return result;
+
+	}
 }
