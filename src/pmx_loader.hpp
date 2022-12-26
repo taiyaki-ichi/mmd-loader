@@ -49,24 +49,26 @@ namespace mmdl
 		std::int32_t len;
 		std::int32_t char_size = static_cast<std::int32_t>(encode);
 
+		using str_traits = resizable_container_traits<Str, ContainerSizeType>;
+
 		// モデル名の取得
 		read_from_istream(in, &len);
-		result.model_name.resize(len / char_size);
+		str_traits::resize(result.model_name, len / char_size);
 		read_str_from_istream(in, &result.model_name, len / char_size, char_size);
 
 		// モデルの英語名の取得
 		read_from_istream(in, &len);
-		result.english_mode_name.resize(len / char_size);
+		str_traits::resize(result.english_mode_name, len / char_size);
 		read_str_from_istream(in, &result.english_mode_name, len / char_size, char_size);
 
 		// コメントの取得
 		read_from_istream(in, &len);
-		result.comment.resize(len / char_size);
+		str_traits::resize(result.comment, len / char_size);
 		read_str_from_istream(in, &result.comment, len / char_size, char_size);
 
 		// 英語のコメントの取得
 		read_from_istream(in, &len);
-		result.english_comment.resize(len / char_size);
+		str_traits::resize(result.english_comment, len / char_size);
 		read_str_from_istream(in, &result.english_comment, len / char_size, char_size);
 
 		return result;
