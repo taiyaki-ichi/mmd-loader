@@ -82,25 +82,26 @@ namespace mmdl
 	Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
 	{
 		using result_type = Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>;
+		using container_traits = resizable_container_traits<result_type, std::size_t>;
 
 		result_type result;
 
 		// 頂点の数を取得
 		std::int32_t num;
 		read_from_istream(in, &num);
-		resizable_container_traits<result_type, std::int32_t>::resize(result, num);
+		container_traits::resize(result, num);
 
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < num; i++)
 		{
-			read_vec3_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).position);
-			read_vec3_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).normal);
-			read_vec2_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).uv);
+			read_vec3_from_istream(in, &container_traits::get(result, i).position);
+			read_vec3_from_istream(in, &container_traits::get(result, i).normal);
+			read_vec2_from_istream(in, &container_traits::get(result, i).uv);
 
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				read_vec4_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).additional_uv[j]);
+				read_vec4_from_istream(in, &container_traits::get(result, i).additional_uv[j]);
 			}
 
 			// ウェイト変形方式の取得
@@ -111,45 +112,45 @@ namespace mmdl
 			{
 				// BDEF1の場合
 			case 0:
-				read_intanger_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).bone[0], bone_index_size);
+				read_intanger_from_istream(in, &container_traits::get(result, i).bone[0], bone_index_size);
 				// 単一のボーンの重みが1であることを示す
-				resizable_container_traits<result_type, std::size_t>::get(result, i).weight[0] = 1.f;
+				container_traits::get(result, i).weight[0] = 1.f;
 				break;
 
 				// BDEF2の場合
 			case 1:
-				read_intanger_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).bone[1], bone_index_size);
-				read_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).weight[0]);
+				read_intanger_from_istream(in, &container_traits::get(result, i).bone[0], bone_index_size);
+				read_intanger_from_istream(in, &container_traits::get(result, i).bone[1], bone_index_size);
+				read_from_istream(in, &container_traits::get(result, i).weight[0]);
 				// 2本のボーンの重みは合計1になる
-				resizable_container_traits<result_type, std::size_t>::get(result, i).weight[1] = 1.f - resizable_container_traits<result_type, std::size_t>::get(result, i).weight[0];
+				container_traits::get(result, i).weight[1] = 1.f - container_traits::get(result, i).weight[0];
 				break;
 
 				// BDEF4の場合
 			case 2:
 				// 4つのボーンのインデックスの取得
 				for (std::size_t j = 0; j < 4; j++)
-					read_intanger_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).bone[j], bone_index_size);
+					read_intanger_from_istream(in, &container_traits::get(result, i).bone[j], bone_index_size);
 				// 4つのボーンの重みの取得
 				for (std::size_t j = 0; j < 4; j++)
-					read_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).weight[j]);
+					read_from_istream(in, &container_traits::get(result, i).weight[j]);
 				break;
 
 				// SDEFの倍
 			case 3:
-				read_intanger_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).bone[1], bone_index_size);
-				read_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).weight[0]);
+				read_intanger_from_istream(in, &container_traits::get(result, i).bone[0], bone_index_size);
+				read_intanger_from_istream(in, &container_traits::get(result, i).bone[1], bone_index_size);
+				read_from_istream(in, &container_traits::get(result, i).weight[0]);
 				// ここまでBDEF2と同じ
 				std::array<Vec3, 3> sdef;
 				for (std::size_t j = 0; j < 3; j++)
 					read_from_istream(in, &sdef[j]);
-				resizable_container_traits<result_type, std::size_t>::get(result, i).sdef = std::move(sdef);
+				container_traits::get(result, i).sdef = std::move(sdef);
 				break;
 			}
 
 			// エッジ倍率の取得
-			read_from_istream(in, &resizable_container_traits<result_type, std::size_t>::get(result, i).edge_magnification);
+			read_from_istream(in, &container_traits::get(result, i).edge_magnification);
 
 		}
 
