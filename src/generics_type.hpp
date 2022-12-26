@@ -20,13 +20,14 @@ namespace mmdl
 		struct resizable_container_traits
 	{
 		using value_type = typename T::value_type;
+		using size_type = U;
 
-		static void resize(T& t, U u)
+		static void resize(T& t, size_type u)
 		{
 			t.resize(u);
 		}
 
-		static value_type& get(T& t, U u)
+		static value_type& get(T& t, size_type u)
 		{
 			return t[u];
 		}
