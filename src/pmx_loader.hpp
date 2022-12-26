@@ -186,4 +186,40 @@ namespace mmdl
 		return result;
 	}
 
+	// テクスチャパスの読み込み
+	template<template<typename> typename Container, typename Str, typename ContainerSizeType = std::size_t, typename StrSizeType = std::size_t>
+		requires resizable_container<Container<Str>, ContainerSizeType>&& resizable_container<Str, StrSizeType>
+	Container<Str> load_texture_path(std::istream& in, encode_type encode)
+	{
+		using container_traits = resizable_container_traits<Container<Str>, ContainerSizeType>;
+		using str_traits = resizable_container_traits<Str, StrSizeType>;
+
+		Container<Str> result;
+
+		// コンテナのサイズの指定
+		std::int32_t num;
+		read_from_istream(in, &num);
+		container_traits::resize(result, static_cast<container_traits::size_type>(num));
+
+		// 文字の大きさ
+		auto char_size = static_cast<str_traits::size_type>(encode);
+
+		// 1文字列ごとに取得していく
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			// 文字列を格納する参照
+			auto& str = container_traits::get(result, static_cast<container_traits::size_type>(i));
+
+			// 長さの取得
+			std::int32_t len;
+			read_from_istream(in, &len);
+
+			// 文字列の読み込み
+			str_traits::resize(str, static_cast<str_traits::size_type>(len / char_size));
+			read_array_from_istream(in, &str, len / char_size, char_size);
+
+		}
+
+		return result;
+	}
 }

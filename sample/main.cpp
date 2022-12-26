@@ -23,7 +23,7 @@ struct vec4
 
 int main()
 {
-	
+
 	{
 		const wchar_t* file_path = L"../../3dmodel/ƒpƒCƒ‚ƒ“/”h–Ö.pmx";
 		std::ifstream file{ file_path ,std::ios::binary };
@@ -31,6 +31,7 @@ int main()
 		auto info = mmdl::load_info<std::wstring>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
+		auto texture_path = mmdl::load_texture_path<std::vector, std::wstring>(file, header.encode);
 	}
 
 	{
@@ -40,6 +41,8 @@ int main()
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
+		auto texture_path = mmdl::load_texture_path<std::vector, std::string>(file, header.encode);
+
 	}
 
 	{
@@ -49,6 +52,7 @@ int main()
 		auto info = mmdl::load_info<std::wstring>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
+		auto texture_path = mmdl::load_texture_path<std::vector, std::wstring>(file, header.encode);
 	}
 
 	{
@@ -58,6 +62,7 @@ int main()
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
+		auto texture_path = mmdl::load_texture_path<std::vector, std::string>(file, header.encode);
 	}
 
 	{
@@ -67,6 +72,7 @@ int main()
 		auto info = mmdl::load_info<std::wstring>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
+		auto texture_path = mmdl::load_texture_path<std::vector, std::wstring>(file, header.encode);
 	}
 
 	{
@@ -76,7 +82,8 @@ int main()
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
 		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
+		auto texture_path = mmdl::load_texture_path<std::vector, std::string>(file, header.encode);
 	}
-	
+
 	return 0;
 }
