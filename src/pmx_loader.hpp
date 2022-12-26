@@ -164,6 +164,7 @@ namespace mmdl
 	Container<pmx_surface<VertexIndex>> load_surface(std::istream& in, HeaderData vertex_index_size)
 	{
 		using result_type = Container<pmx_surface<VertexIndex>>;
+		using container_traits = resizable_container_traits<result_type, ContainerSizeType>;
 
 		result_type result;
 
@@ -172,12 +173,12 @@ namespace mmdl
 		read_from_istream(in, &num);
 
 		// ƒRƒ“ƒeƒi‚Ì‘å‚«‚³İ’è
-		resizable_container_traits<result_type, std::int32_t>::resize(result, num);
+		container_traits::resize(result, num);
 
 		// ‚»‚ê‚¼‚ê‚Ìî•ñ‚ğæ“¾
 		for (std::size_t i = 0; i < num; i++)
 		{
-			read_intanger_from_istream(in, &resizable_container_traits<result_type, VertexIndex>::get(result, i), vertex_index_size);
+			read_intanger_from_istream(in, &container_traits::get(result, i), vertex_index_size);
 		}
 
 		return result;
