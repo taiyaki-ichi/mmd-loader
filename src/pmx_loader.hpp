@@ -93,7 +93,7 @@ namespace mmdl
 		container_traits::resize(result, static_cast<size_type>(num));
 
 		// ‚»‚ê‚¼‚ê‚Ì’¸“_‚Ìæ“¾
-		for (std::size_t i = 0; i < num; i++)
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
 			read_vec3_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).position);
 			read_vec3_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).normal);
@@ -178,7 +178,7 @@ namespace mmdl
 		container_traits::resize(result, static_cast<size_type>(num));
 
 		// ‚»‚ê‚¼‚ê‚Ìî•ñ‚ğæ“¾
-		for (std::size_t i = 0; i < num; i++)
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
 			read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)), vertex_index_size);
 		}
