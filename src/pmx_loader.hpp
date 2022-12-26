@@ -53,22 +53,22 @@ namespace mmdl
 
 		// モデル名の取得
 		read_from_istream(in, &len);
-		str_traits::resize(result.model_name, len / char_size);
+		str_traits::resize(result.model_name, static_cast<str_traits::size_type>(len / char_size));
 		read_str_from_istream(in, &result.model_name, len / char_size, char_size);
 
 		// モデルの英語名の取得
 		read_from_istream(in, &len);
-		str_traits::resize(result.english_mode_name, len / char_size);
+		str_traits::resize(result.english_mode_name, static_cast<str_traits::size_type>(len / char_size));
 		read_str_from_istream(in, &result.english_mode_name, len / char_size, char_size);
 
 		// コメントの取得
 		read_from_istream(in, &len);
-		str_traits::resize(result.comment, len / char_size);
+		str_traits::resize(result.comment, static_cast<str_traits::size_type>(len / char_size));
 		read_str_from_istream(in, &result.comment, len / char_size, char_size);
 
 		// 英語のコメントの取得
 		read_from_istream(in, &len);
-		str_traits::resize(result.english_comment, len / char_size);
+		str_traits::resize(result.english_comment, static_cast<str_traits::size_type>(len / char_size));
 		read_str_from_istream(in, &result.english_comment, len / char_size, char_size);
 
 		return result;
@@ -83,25 +83,26 @@ namespace mmdl
 	{
 		using result_type = Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>;
 		using container_traits = resizable_container_traits<result_type, ContainterSizeType>;
+		using size_type = container_traits::size_type;
 
 		result_type result;
 
 		// 頂点の数を取得
 		std::int32_t num;
 		read_from_istream(in, &num);
-		container_traits::resize(result, num);
+		container_traits::resize(result, static_cast<size_type>(num));
 
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < num; i++)
 		{
-			read_vec3_from_istream(in, &container_traits::get(result, i).position);
-			read_vec3_from_istream(in, &container_traits::get(result, i).normal);
-			read_vec2_from_istream(in, &container_traits::get(result, i).uv);
+			read_vec3_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).position);
+			read_vec3_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).normal);
+			read_vec2_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).uv);
 
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				read_vec4_from_istream(in, &container_traits::get(result, i).additional_uv[j]);
+				read_vec4_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).additional_uv[j]);
 			}
 
 			// ウェイト変形方式の取得
@@ -112,45 +113,45 @@ namespace mmdl
 			{
 				// BDEF1の場合
 			case 0:
-				read_intanger_from_istream(in, &container_traits::get(result, i).bone[0], bone_index_size);
+				read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).bone[0], bone_index_size);
 				// 単一のボーンの重みが1であることを示す
-				container_traits::get(result, i).weight[0] = 1.f;
+				container_traits::get(result, static_cast<size_type>(i)).weight[0] = 1.f;
 				break;
 
 				// BDEF2の場合
 			case 1:
-				read_intanger_from_istream(in, &container_traits::get(result, i).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &container_traits::get(result, i).bone[1], bone_index_size);
-				read_from_istream(in, &container_traits::get(result, i).weight[0]);
+				read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).bone[0], bone_index_size);
+				read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).bone[1], bone_index_size);
+				read_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).weight[0]);
 				// 2本のボーンの重みは合計1になる
-				container_traits::get(result, i).weight[1] = 1.f - container_traits::get(result, i).weight[0];
+				container_traits::get(result, static_cast<size_type>(i)).weight[1] = 1.f - container_traits::get(result, static_cast<size_type>(i)).weight[0];
 				break;
 
 				// BDEF4の場合
 			case 2:
 				// 4つのボーンのインデックスの取得
 				for (std::size_t j = 0; j < 4; j++)
-					read_intanger_from_istream(in, &container_traits::get(result, i).bone[j], bone_index_size);
+					read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).bone[j], bone_index_size);
 				// 4つのボーンの重みの取得
 				for (std::size_t j = 0; j < 4; j++)
-					read_from_istream(in, &container_traits::get(result, i).weight[j]);
+					read_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).weight[j]);
 				break;
 
 				// SDEFの倍
 			case 3:
-				read_intanger_from_istream(in, &container_traits::get(result, i).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &container_traits::get(result, i).bone[1], bone_index_size);
-				read_from_istream(in, &container_traits::get(result, i).weight[0]);
+				read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).bone[0], bone_index_size);
+				read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).bone[1], bone_index_size);
+				read_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).weight[0]);
 				// ここまでBDEF2と同じ
 				std::array<Vec3, 3> sdef;
 				for (std::size_t j = 0; j < 3; j++)
 					read_from_istream(in, &sdef[j]);
-				container_traits::get(result, i).sdef = std::move(sdef);
+				container_traits::get(result, static_cast<size_type>(i)).sdef = std::move(sdef);
 				break;
 			}
 
 			// エッジ倍率の取得
-			read_from_istream(in, &container_traits::get(result, i).edge_magnification);
+			read_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)).edge_magnification);
 
 		}
 
@@ -165,6 +166,7 @@ namespace mmdl
 	{
 		using result_type = Container<pmx_surface<VertexIndex>>;
 		using container_traits = resizable_container_traits<result_type, ContainerSizeType>;
+		using size_type = container_traits::size_type;
 
 		result_type result;
 
@@ -173,12 +175,12 @@ namespace mmdl
 		read_from_istream(in, &num);
 
 		// コンテナの大きさ設定
-		container_traits::resize(result, num);
+		container_traits::resize(result, static_cast<size_type>(num));
 
 		// それぞれの情報を取得
 		for (std::size_t i = 0; i < num; i++)
 		{
-			read_intanger_from_istream(in, &container_traits::get(result, i), vertex_index_size);
+			read_intanger_from_istream(in, &container_traits::get(result, static_cast<size_type>(i)), vertex_index_size);
 		}
 
 		return result;
