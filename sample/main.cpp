@@ -30,6 +30,7 @@ int main()
 		auto header = mmdl::load_header<>(file);
 		auto info = mmdl::load_info<std::wstring>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
+		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
 	}
 
 	{
@@ -38,6 +39,7 @@ int main()
 		auto header = mmdl::load_header<>(file);
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
+		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
 	}
 
 	{
@@ -46,6 +48,7 @@ int main()
 		auto header = mmdl::load_header<>(file);
 		auto info = mmdl::load_info<std::wstring>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
+		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
 	}
 
 	{
@@ -54,6 +57,7 @@ int main()
 		auto header = mmdl::load_header<>(file);
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
+		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
 	}
 
 	{
@@ -62,6 +66,7 @@ int main()
 		auto header = mmdl::load_header<>(file);
 		auto info = mmdl::load_info<std::wstring>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
+		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
 	}
 
 	{
@@ -70,6 +75,7 @@ int main()
 		auto header = mmdl::load_header<>(file);
 		auto info = mmdl::load_info<std::string>(file, header.encode);
 		auto vertex = mmdl::load_vertex<std::vector, vec2, vec3, vec4>(file, header.add_uv_number, header.bone_index_size);
+		auto surface = mmdl::load_surface<std::vector>(file, header.vertex_index_size);
 	}
 	
 	return 0;

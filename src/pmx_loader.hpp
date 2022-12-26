@@ -41,8 +41,8 @@ namespace mmdl
 	}
 
 	template<typename Str>
-	requires resizable_container<Str, decltype(0)>
-		pmx_info<Str> load_info(std::istream& in, encode_type encode)
+		requires resizable_container<Str, decltype(0)>
+	pmx_info<Str> load_info(std::istream& in, encode_type encode)
 	{
 		pmx_info<Str> result;
 
@@ -75,8 +75,8 @@ namespace mmdl
 
 	// 頂点情報の読み込み
 	template<template<typename> typename Container, constructible_vec2 Vec2, constructible_vec3 Vec3, constructible_vec4 Vec4, typename BoneIndex = std::int32_t, typename  HeaderData = std::uint8_t>
-	requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, BoneIndex>&& resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::int32_t>
-		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
+		requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, BoneIndex>&& resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::int32_t>
+	Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
 	{
 		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> result;
 
@@ -150,6 +150,31 @@ namespace mmdl
 
 		return result;
 
+	}
+
+	// 面情報の読み込み
+	template<template<typename> typename Container,typename VertexIndex=std::int32_t,typename HeaderData=std::uint8_t>
+	requires resizable_container<Container<pmx_surface<VertexIndex>>, VertexIndex>&& resizable_container<Container<pmx_surface<VertexIndex>>, std::int32_t>
+	Container<pmx_surface<VertexIndex>> load_surface(std::istream& in, HeaderData vertex_index_size)
+	{
+		using result_type = Container<pmx_surface<VertexIndex>>;
+
+		result_type result;
+
+		// 面の数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		// コンテナの大きさ設定
+		resizable_container_traits<result_type,std::int32_t>::resize(result, num);
+
+		// それぞれの情報を取得
+		for (std::size_t i = 0; i < num; i++)
+		{
+			read_intanger_from_istream(in, &resizable_container_traits<result_type, VertexIndex>::get(result, i), vertex_index_size);
+		}
+
+		return result;
 	}
 
 }
