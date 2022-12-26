@@ -40,8 +40,8 @@ namespace mmdl
 		return result;
 	}
 
-	template<typename Str, typename ContainerSizeType = std::size_t>
-		requires resizable_container<Str, ContainerSizeType>
+	template<typename Str, typename StrSizeType = std::size_t>
+		requires resizable_container<Str, StrSizeType>
 	pmx_info<Str> load_info(std::istream& in, encode_type encode)
 	{
 		pmx_info<Str> result;
@@ -49,7 +49,7 @@ namespace mmdl
 		std::int32_t len;
 		std::int32_t char_size = static_cast<std::int32_t>(encode);
 
-		using str_traits = resizable_container_traits<Str, ContainerSizeType>;
+		using str_traits = resizable_container_traits<Str, StrSizeType>;
 
 		// ƒ‚ƒfƒ‹–¼‚ÌŽæ“¾
 		read_from_istream(in, &len);
