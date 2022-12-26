@@ -54,22 +54,22 @@ namespace mmdl
 		// モデル名の取得
 		read_from_istream(in, &len);
 		str_traits::resize(result.model_name, static_cast<str_traits::size_type>(len / char_size));
-		read_str_from_istream(in, &result.model_name, len / char_size, char_size);
+		read_array_from_istream(in, &result.model_name, len / char_size, char_size);
 
 		// モデルの英語名の取得
 		read_from_istream(in, &len);
 		str_traits::resize(result.english_mode_name, static_cast<str_traits::size_type>(len / char_size));
-		read_str_from_istream(in, &result.english_mode_name, len / char_size, char_size);
+		read_array_from_istream(in, &result.english_mode_name, len / char_size, char_size);
 
 		// コメントの取得
 		read_from_istream(in, &len);
 		str_traits::resize(result.comment, static_cast<str_traits::size_type>(len / char_size));
-		read_str_from_istream(in, &result.comment, len / char_size, char_size);
+		read_array_from_istream(in, &result.comment, len / char_size, char_size);
 
 		// 英語のコメントの取得
 		read_from_istream(in, &len);
 		str_traits::resize(result.english_comment, static_cast<str_traits::size_type>(len / char_size));
-		read_str_from_istream(in, &result.english_comment, len / char_size, char_size);
+		read_array_from_istream(in, &result.english_comment, len / char_size, char_size);
 
 		return result;
 	}

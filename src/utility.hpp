@@ -49,11 +49,11 @@ namespace mmdl
 
 	template<typename T, typename U>
 	requires resizable_container<T, U>
-		void read_str_from_istream(std::istream& in, T* out, U str_len, U char_size)
+		void read_array_from_istream(std::istream& in, T* out, U size, U stride)
 	{
-		for (U i = 0; i < str_len; i++)
+		for (U i = 0; i < size; i++)
 		{
-			read_from_istream(in, &resizable_container_traits<T, U>::get(*out, i), char_size);
+			read_from_istream(in, &resizable_container_traits<T, U>::get(*out, i), stride);
 		}
 	}
 
