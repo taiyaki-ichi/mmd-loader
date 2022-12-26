@@ -82,7 +82,7 @@ namespace mmdl
 	Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
 	{
 		using result_type = Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>;
-		using container_traits = resizable_container_traits<result_type, std::size_t>;
+		using container_traits = resizable_container_traits<result_type, ContainterSizeType>;
 
 		result_type result;
 
