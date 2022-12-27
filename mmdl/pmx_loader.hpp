@@ -47,7 +47,7 @@ namespace mmdl
 		pmx_info<Str> result;
 
 		std::int32_t len;
-		std::int32_t char_size = static_cast<std::int32_t>(encode);
+		auto const char_size = static_cast<std::int32_t>(encode);
 
 		using str_traits = resizable_container_traits<Str, StrSizeType>;
 
@@ -202,7 +202,7 @@ namespace mmdl
 		container_traits::resize(result, static_cast<container_traits::size_type>(num));
 
 		// •¶Žš‚Ì‘å‚«‚³
-		auto char_size = static_cast<str_traits::size_type>(encode);
+		auto const char_size = static_cast<str_traits::size_type>(encode);
 
 		// 1•¶Žš—ñ‚²‚Æ‚ÉŽæ“¾‚µ‚Ä‚¢‚­
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
