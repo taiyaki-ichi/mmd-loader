@@ -8,10 +8,10 @@ namespace mmdl
 {
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
-	template<std::integral HeaderData = std::uint8_t>
-	pmx_header<HeaderData> load_header(std::istream& in)
+	template<std::integral HeaderDataType = std::uint8_t>
+	pmx_header<HeaderDataType> load_header(std::istream& in)
 	{
-		pmx_header<HeaderData> result;
+		pmx_header<HeaderDataType> result;
 
 		// 最初の4文字はいらない「Pmx 」の文字
 		in.seekg(4);
@@ -25,8 +25,8 @@ namespace mmdl
 		// WARNING: ここだけbitっぽい?
 		size /= 8;
 
-		HeaderData encode;
-		read_intanger_from_istream<HeaderData>(in, &encode, size);
+		HeaderDataType encode;
+		read_intanger_from_istream<HeaderDataType>(in, &encode, size);
 		result.encode = encode == 0 ? encode_type::utf16 : encode_type::utf8;
 		read_intanger_from_istream(in, &result.add_uv_number, size);
 
@@ -77,9 +77,9 @@ namespace mmdl
 
 	// 頂点情報の読み込み
 	template<template<typename> typename Container, constructible_vec2 Vec2, constructible_vec3 Vec3, constructible_vec4 Vec4,
-		typename BoneIndex = std::int32_t, typename  HeaderData = std::uint8_t, typename ContainterSizeType = std::size_t>
+		typename BoneIndex = std::int32_t, typename  HeaderDataType = std::uint8_t, typename ContainterSizeType = std::size_t>
 		requires resizable_container<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, std::size_t>
-	Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderData add_uv_number, HeaderData bone_index_size)
+	Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderDataType add_uv_number, HeaderDataType bone_index_size)
 	{
 		using result_type = Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>;
 		using container_traits = resizable_container_traits<result_type, ContainterSizeType>;
@@ -160,9 +160,9 @@ namespace mmdl
 	}
 
 	// 面情報の読み込み
-	template<template<typename> typename Container, typename VertexIndex = std::int32_t, typename HeaderData = std::uint8_t, typename ContainerSizeType = std::size_t>
+	template<template<typename> typename Container, typename VertexIndex = std::int32_t, typename HeaderDataType = std::uint8_t, typename ContainerSizeType = std::size_t>
 		requires resizable_container<Container<pmx_surface<VertexIndex>>, ContainerSizeType>
-	Container<pmx_surface<VertexIndex>> load_surface(std::istream& in, HeaderData vertex_index_size)
+	Container<pmx_surface<VertexIndex>> load_surface(std::istream& in, HeaderDataType vertex_index_size)
 	{
 		using result_type = Container<pmx_surface<VertexIndex>>;
 		using container_traits = resizable_container_traits<result_type, ContainerSizeType>;
@@ -225,9 +225,9 @@ namespace mmdl
 
 	// マテリアルの読み込み
 	template<template<typename>typename Container, typename Str, constructible_vec3 Vec3, constructible_vec4 Vec4,
-		typename TextureIndex = std::int32_t, typename HeaderData = std::uint8_t, typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t>
+		typename TextureIndex = std::int32_t, typename HeaderDataType = std::uint8_t, typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t>
 		requires resizable_container<Container<Str>, ContianerSizeType>&& resizable_container<Str, StrSizeType>
-	Container<pmx_material<Str, Vec3, Vec4, TextureIndex>> load_material(std::istream& in, encode_type encode, HeaderData texture_index_size)
+	Container<pmx_material<Str, Vec3, Vec4, TextureIndex>> load_material(std::istream& in, encode_type encode, HeaderDataType texture_index_size)
 	{
 		using container_type = Container<pmx_material<Str, Vec3, Vec4, TextureIndex>>;
 		using container_traits = resizable_container_traits<container_type, ContianerSizeType>;
