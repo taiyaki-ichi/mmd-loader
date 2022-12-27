@@ -1,17 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "src", "src\src.vcxitems", "{3AA51E0E-A689-40C6-AD80-86EE6BB39B2D}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sample", "sample\sample.vcxproj", "{06A755D3-7398-4B02-B292-1CBE70F10FF0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mmdl", "mmdl\mmdl.vcxitems", "{5F89748D-D62E-4BAC-95DA-64373DE7DC45}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\src.vcxitems*{06a755d3-7398-4b02-b292-1cbe70f10ff0}*SharedItemsImports = 4
-		src\src.vcxitems*{3aa51e0e-a689-40c6-ad80-86ee6bb39b2d}*SharedItemsImports = 9
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
@@ -33,5 +29,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {236B979C-5DCF-485F-88D1-A63995893C41}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		mmdl\mmdl.vcxitems*{06a755d3-7398-4b02-b292-1cbe70f10ff0}*SharedItemsImports = 4
+		mmdl\mmdl.vcxitems*{5f89748d-d62e-4bac-95da-64373de7dc45}*SharedItemsImports = 9
 	EndGlobalSection
 EndGlobal
