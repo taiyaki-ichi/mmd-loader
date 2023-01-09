@@ -228,6 +228,63 @@ namespace mmdl
 
 	};
 
+	enum class bone_flag
+	{
+		// 接続先法事方法
+		// false: 座標オフセットで指定
+		// true: ボーンで指定
+		access_point = 0,
+
+		// 回転可能かどうか
+		rotatable = 1,
+
+		// 移動可能かどうか
+		movable = 2,
+
+		// 表示
+		// WARNING; 表示可能かどうかという意味か?
+		display = 3,
+
+		// 操作可能かどうか
+		operable = 4,
+
+		// IK使うかどうか
+		ik = 5,
+
+		// ローカル付与
+		// false: ユーザー変形値／IKリンク／多重付与
+		// true: 親のローカル変形量
+		local_grant = 7,
+
+		// 回転付与
+		rotation_grant = 8,
+
+		// 移動付与
+		move_grant = 9,
+
+		// 軸固定かどうか
+		fix_axis = 10,
+
+		// ローカル軸かどうか
+		local_axis = 11,
+
+		// 物理後変形かどうか
+		post_physical_deformation = 12,
+
+		// 外部親変形かどうか
+		external_parent_deformation = 13,
+
+	};
+
+	template<typename Vec3, typename BoneIndex>
+	struct ik_link {
+		// リンクしているボーン
+		BoneIndex bone;
+
+		// 角度制限を行う場合の最小、最大の角度の制限
+		std::optional<std::pair<Vec3, Vec3>> min_max_angle_limit;
+	};
+
 	// ボーン
 	// pmx_header.bone_index_sizeは1,2,4の値をとるので、最大値に対応したint32_tをデフォルトに指定
 	template<typename Str, typename Vec3, template<typename> typename Container, typename BoneIndex = std::int32_t>
@@ -246,54 +303,6 @@ namespace mmdl
 		// 変形階層
 		std::int32_t trannsformation_level;
 
-		enum class bone_flag
-		{
-			// 接続先法事方法
-			// false: 座標オフセットで指定
-			// true: ボーンで指定
-			access_point,
-
-			// 回転可能かどうか
-			rotatable,
-
-			// 移動可能かどうか
-			movable,
-
-			// 表示
-			// WARNING; 表示可能かどうかという意味か?
-			display,
-
-			// 操作可能かどうか
-			operable,
-
-			// IK使うかどうか
-			ik,
-
-			// ローカル付与
-			// false: ユーザー変形値／IKリンク／多重付与
-			// true: 親のローカル変形量
-			local_grant,
-
-			// 回転付与
-			rotation_grant,
-
-			// 移動付与
-			move_grant,
-
-			// 軸固定かどうか
-			fix_axis,
-
-			// ローカル軸かどうか
-			local_axis,
-
-			// 物理後変形かどうか
-			post_physical_deformation,
-
-			// 外部親変形かどうか
-			external_parent_deformation,
-
-		};
-
 		// WARNING: マジックナンバー
 		std::bitset<16> bone_flag_bits;
 
@@ -308,7 +317,7 @@ namespace mmdl
 		// 対象のボーンを表す
 		BoneIndex grant_index;
 		// 付与率
-		Vec3 grant_rate;
+		float grant_rate;
 
 		// bone_flag_bits[fix_axis]=trueの時に使用
 		// 固定された軸の方向ベクトル
@@ -322,25 +331,17 @@ namespace mmdl
 
 		// bone_flag_bits[external_parent_deformation]=trueの時に使用
 		// Keyの値
-		std::int16_t external_parent_deformation_key;
+		std::int32_t external_parent_deformation_key;
 
 		// bone_flag_bits[ik]=trueの時に使用
 		//IKのターゲットのボーン
 		BoneIndex ik_target_bone;
 		// IKのループ回数
-		std::int16_t ik_roop_number;
+		std::int32_t ik_roop_number;
 		// IKのループを行う際の1回当たりの制限角度（ラジアン）
 		float ik_rook_angle;
 
-		struct ik_link {
-			// リンクしているボーン
-			BoneIndex bone;
-
-			// 角度制限を行う場合の最小、最大の角度の制限
-			std::optional<std::pair<Vec3, Vec3>> min_max_angle_limit;
-		};
-
-		Container<ik_link> ik_link;
+		Container<ik_link<Vec3, BoneIndex>> ik_link;
 
 
 		// TODO: 「 bone_flag_bits[-]=trueの時に使用」って書いてあるとこはOptionalでイイかも
