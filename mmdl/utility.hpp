@@ -1,5 +1,6 @@
 #pragma once
 #include<istream>
+#include<Windows.h>
 #include"generics_type.hpp"
 
 namespace mmdl
@@ -48,8 +49,8 @@ namespace mmdl
 	}
 
 	template<typename T, typename U>
-	requires resizable_container<T, U>
-		void read_array_from_istream(std::istream& in, T* out, U size, U stride)
+		requires resizable_container<T, U>
+	void read_array_from_istream(std::istream& in, T* out, U size, U stride)
 	{
 		for (U i = 0; i < size; i++)
 		{
@@ -85,5 +86,54 @@ namespace mmdl
 		read_from_istream(in, &z);
 		read_from_istream(in, &w);
 		*out = constructible_vec4_traits<T>::construct(x, y, z, w);
+	}
+
+	// utf16からutf8への変換
+	template<typename DstStr, typename SrcStr>
+	DstStr utf16_to_utf8(SrcStr const& src)
+	{
+		// 変換後の大きさの取得
+		auto dst_size = WideCharToMultiByte(CP_UTF8, 0, src.data(), -1, nullptr, 0, nullptr, nullptr);
+
+		// サイズの変更
+		DstStr result;
+		result.resize(dst_size);
+
+		// 変換
+		WideCharToMultiByte(CP_UTF8, 0, src.data(), -1, result.data(), dst_size, nullptr, nullptr);
+
+		return result;
+	}
+
+	template<typename DstStr, typename SrcStr>
+	DstStr utf8_to_utf16(SrcStr const& src)
+	{
+		// 返還後の大きさの取得
+		auto dst_size = MultiByteToWideChar(CP_UTF8, 0, src.data(), -1, nullptr, 0);
+
+		// サイズの変更
+		DstStr result;
+		result.resize(dst_size);
+
+		// 変換
+		MultiByteToWideChar(CP_UTF8, 0, src.data(), -1, result.data(), dst_size);
+
+		return result;
+	}
+
+	template<typename DstStr, typename SrcStr>
+	DstStr ansi_to_utf16(SrcStr const& src)
+	{
+		// 返還後の大きさの取得
+		auto dst_size = MultiByteToWideChar(CP_ACP, 0, src.data(), -1, nullptr, 0);
+
+		// サイズの変更
+		DstStr result;
+		result.resize(dst_size);
+
+		// 変換
+		MultiByteToWideChar(CP_ACP, 0, src.data(), -1, result.data(), dst_size);
+
+		return result;
 	}
 }
