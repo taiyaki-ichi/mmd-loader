@@ -95,6 +95,9 @@ namespace mmdl
 		// 変換後の大きさの取得
 		auto dst_size = WideCharToMultiByte(CP_UTF8, 0, src.data(), -1, nullptr, 0, nullptr, nullptr);
 
+		// 終点文字を追加しない
+		dst_size--;
+
 		// サイズの変更
 		DstStr result;
 		result.resize(dst_size);
@@ -111,6 +114,9 @@ namespace mmdl
 		// 返還後の大きさの取得
 		auto dst_size = MultiByteToWideChar(CP_UTF8, 0, src.data(), -1, nullptr, 0);
 
+		// 終点文字を追加しない
+		dst_size--;
+
 		// サイズの変更
 		DstStr result;
 		result.resize(dst_size);
@@ -126,6 +132,9 @@ namespace mmdl
 	{
 		// 返還後の大きさの取得
 		auto dst_size = MultiByteToWideChar(CP_ACP, 0, src.data(), -1, nullptr, 0);
+
+		// 終点文字を追加しない
+		dst_size--;
 
 		// サイズの変更
 		DstStr result;
