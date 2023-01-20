@@ -1,53 +1,57 @@
 #pragma once
 #include<concepts>
 #include<type_traits>
+#include<string>
 
 namespace mmdl
 {
+	// プライマリテンプレート
+	template<typename>
+	struct count_construct_container_traits {};
 
-	// 標準ライブラリなどのサイズ指定可能なコンテナ
-	template<typename T, typename U>
-	concept standard_resizable_container = requires(T t, U u)
-	{
+	// サイズ指定し構築可能で、添え字演算子で参照を返す型についての特殊化
+	template<typename T>
+		requires (std::constructible_from<T, std::size_t>&&
+		requires(T& t, std::size_t i) {
 		typename T::value_type;
-		t.resize(u);
-		{t[u]} ->  std::convertible_to<std::add_lvalue_reference_t<typename T::value_type>>;
-	};
-
-	// サイズ指定可能なコンテナのトレイツ
-	template<typename T, typename U>
-	requires standard_resizable_container<T, U>
-		struct resizable_container_traits
+		{t[i]} ->  std::convertible_to<std::add_lvalue_reference_t<typename T::value_type>>;
+	})
+	struct count_construct_container_traits<T>
 	{
-		using value_type = typename T::value_type;
-		using size_type = U;
+		using value_type = T::value_type;
 
-		static void resize(T& t, size_type u)
-		{
-			t.resize(u);
+		// サイズを指定して構築
+		static T construct(std::size_t n) {
+			return T(n);
 		}
 
-		static value_type& get(T& t, size_type u)
-		{
-			return t[u];
+		// 添え字から参照の取得
+		static value_type& get_reference(T& t, std::size_t i) {
+			return t[i];
+		}
+	};
+
+	// 文字列を表す型についての特殊化
+	template <typename CharT>
+	struct count_construct_container_traits<std::basic_string<CharT>>
+	{
+		using value_type = std::basic_string<CharT>::value_type;
+
+		// サイズを指定して構築
+		static std::basic_string<CharT> construct(std::size_t n) {
+			return std::basic_string<CharT>(n, CharT{});
 		}
 
+		// 添え字から参照の取得
+		static value_type& get_reference(std::basic_string<CharT>& str, std::size_t i) {
+			return str[i];
+		}
 	};
-
-	// サイズ指定可能なコンテナ
-	template<typename T, typename U>
-	concept resizable_container = requires(T & t, U u)
-	{
-		typename resizable_container_traits<T, U>::value_type;
-		resizable_container_traits<T, U>::resize(t, u);
-		resizable_container_traits<T, U>::get(t, u);
-	};
-
 
 	// 2次元ベクトルが構築可能であることを表すトレイツ
 	template<typename T>
-	requires std::constructible_from<T, float, float>&& std::move_constructible<T>
-		struct constructible_vec2_traits
+		requires std::constructible_from<T, float, float>&& std::move_constructible<T>
+	struct constructible_vec2_traits
 	{
 		static T construct(float x, float y)
 		{
@@ -65,8 +69,8 @@ namespace mmdl
 
 	// 3次元ベクトルが構築可能であることを表すトレイツ
 	template<typename T>
-	requires std::constructible_from<T, float, float, float>&& std::move_constructible<T>
-		struct constructible_vec3_traits
+		requires std::constructible_from<T, float, float, float>&& std::move_constructible<T>
+	struct constructible_vec3_traits
 	{
 		static T construct(float x, float y, float z)
 		{
@@ -84,8 +88,8 @@ namespace mmdl
 
 	// 4次元ベクトルが構築可能であることを表すトレイツ
 	template<typename T>
-	requires std::constructible_from<T, float, float, float, float>&& std::move_constructible<T>
-		struct constructible_vec4_traits
+		requires std::constructible_from<T, float, float, float, float>&& std::move_constructible<T>
+	struct constructible_vec4_traits
 	{
 		static T construct(float x, float y, float z, float w)
 		{
