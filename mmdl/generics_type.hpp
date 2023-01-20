@@ -6,36 +6,38 @@
 namespace mmdl
 {
 	// プライマリテンプレート
-	template<typename>
+	template<typename, typename>
 	struct count_construct_container_traits {};
 
 	// サイズ指定し構築可能で、添え字演算子で参照を返す型についての特殊化
-	template<typename T>
-		requires (std::constructible_from<T, std::size_t>&&
-		requires(T& t, std::size_t i) {
+	template<typename T, typename SizeType>
+		requires (std::constructible_from<T, SizeType>&&
+			requires(T& t, SizeType i) {
 		typename T::value_type;
 		{t[i]} ->  std::convertible_to<std::add_lvalue_reference_t<typename T::value_type>>;
 	})
-	struct count_construct_container_traits<T>
+		struct count_construct_container_traits<T, SizeType>
 	{
 		using value_type = T::value_type;
+		using size_type = SizeType;
 
 		// サイズを指定して構築
-		static T construct(std::size_t n) {
+		static T construct(SizeType n) {
 			return T(n);
 		}
 
 		// 添え字から参照の取得
-		static value_type& get_reference(T& t, std::size_t i) {
+		static value_type& get_reference(T& t, SizeType i) {
 			return t[i];
 		}
 	};
 
 	// 文字列を表す型についての特殊化
 	template <typename CharT>
-	struct count_construct_container_traits<std::basic_string<CharT>>
+	struct count_construct_container_traits<std::basic_string<CharT>, std::size_t>
 	{
 		using value_type = std::basic_string<CharT>::value_type;
+		using size_type = std::size_t;
 
 		// サイズを指定して構築
 		static std::basic_string<CharT> construct(std::size_t n) {

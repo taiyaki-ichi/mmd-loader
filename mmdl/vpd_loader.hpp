@@ -7,15 +7,15 @@
 namespace mmdl
 {
 	template<template<typename>typename Container, typename Str, typename Vec3, typename Vec4, typename ContainerSizeType = std::size_t, typename StrSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<vpd_data<Str, Vec3, Vec4>>>,
-		typename StrTraits = count_construct_container_traits<Str>>
+		typename ContainerTraits = count_construct_container_traits<Container<vpd_data<Str, Vec3, Vec4>>, ContainerSizeType>,
+		typename StrTraits = count_construct_container_traits<Str, StrSizeType>>
 		Container<vpd_data<Str, Vec3, Vec4>> load_vpd_data(std::istream& in)
 	{
 		Container<vpd_data<Str, Vec3, Vec4>> result;
 
 		// 一時的なバッファとして利用
 		auto str1 = StrTraits::construct(static_cast<std::size_t>(256));
-		auto str2=StrTraits::construct(static_cast<std::size_t>(256));
+		auto str2 = StrTraits::construct(static_cast<std::size_t>(256));
 
 		// in >> str1;
 		// if (str != "Vocaloid Pose Data file")
