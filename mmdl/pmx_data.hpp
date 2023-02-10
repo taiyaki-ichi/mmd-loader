@@ -3,6 +3,7 @@
 #include<array>
 #include<optional>
 #include<bitset>
+#include"generics_type.hpp"
 
 namespace mmdl
 {
@@ -59,6 +60,28 @@ namespace mmdl
 		// 4: 4byteÇÃsigned
 		// Ç∆Ç»ÇÈÇÃÇ≈íçà”
 
+	};
+
+	template<typename HeaderDataType>
+	struct pmx_header_traits<pmx_header<HeaderDataType>>
+	{
+		static pmx_header<HeaderDataType> construct(float version, std::uint8_t encode, std::size_t add_uv_num, std::size_t vertex_index_size, std::size_t texture_index_size,
+			std::size_t material_index_size, std::size_t bone_index_size, std::size_t morph_index_size, std::size_t rigid_body_index_size)
+		{
+			auto result = pmx_header<HeaderDataType>{
+				version,
+				encode == 0 ? encode_type::utf16 : encode_type::utf8,
+				static_cast<HeaderDataType>(add_uv_num),
+				static_cast<HeaderDataType>(vertex_index_size),
+				static_cast<HeaderDataType>(texture_index_size),
+				static_cast<HeaderDataType>(material_index_size),
+				static_cast<HeaderDataType>(bone_index_size),
+				static_cast<HeaderDataType>(morph_index_size),
+				static_cast<HeaderDataType>(rigid_body_index_size)
+			};
+
+			return result;
+		}
 	};
 
 

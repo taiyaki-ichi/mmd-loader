@@ -5,6 +5,35 @@
 
 namespace mmdl
 {
+	template<typename T>
+	struct pmx_header_traits
+	{
+		static T construct(
+			// バージョン
+			float version,
+			// エンコード方式
+			// 0:UTF16, 1:UTF8
+			std::uint8_t encode,
+			// 追加UV数
+			std::size_t add_uv_num,
+			// 頂点Indexサイズ
+			std::size_t vertex_index_size,
+			// テクスチャIndexサイズ
+			std::size_t texture_index_size,
+			// 材質Indexサイズ
+			std::size_t material_index_size,
+			// ボーンIndexサイズ
+			std::size_t bone_index_size,
+			// モーフIndexサイズ
+			std::size_t morph_index_size,
+			// 剛体Indexサイズ
+			std::size_t rigid_body_index_size
+			);
+	};
+
+
+
+
 	// プライマリテンプレート
 	template<typename, typename>
 	struct count_construct_container_traits {};

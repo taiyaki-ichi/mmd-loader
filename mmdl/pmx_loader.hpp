@@ -8,15 +8,14 @@ namespace mmdl
 {
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
-	template<std::integral HeaderDataType = std::uint8_t>
-	pmx_header<HeaderDataType> load_header(std::istream& in)
+	template<typename T, typename traits = pmx_header_traits<T>>
+	T load_header(std::istream& in)
 	{
-		pmx_header<HeaderDataType> result;
-
 		// 最初の4文字はいらない「Pmx 」の文字
 		in.seekg(4);
 
-		read_from_istream(in, &result.version);
+		float version;
+		read_from_istream(in, &version);
 
 		// 以降のデータの大きさの読み込み
 		std::uint8_t size;
@@ -25,19 +24,27 @@ namespace mmdl
 		// WARNING: ここだけbitっぽい?
 		size /= 8;
 
-		HeaderDataType encode;
-		read_intanger_from_istream<HeaderDataType>(in, &encode, size);
-		result.encode = encode == 0 ? encode_type::utf16 : encode_type::utf8;
-		read_intanger_from_istream(in, &result.add_uv_number, size);
+		std::uint8_t encode;
+		read_intanger_from_istream(in, &encode, size);
+		std::size_t add_uv_number;
+		read_intanger_from_istream(in, &add_uv_number, size);
 
-		read_intanger_from_istream(in, &result.vertex_index_size, size);
-		read_intanger_from_istream(in, &result.texture_index_size, size);
-		read_intanger_from_istream(in, &result.material_index_size, size);
-		read_intanger_from_istream(in, &result.bone_index_size, size);
-		read_intanger_from_istream(in, &result.morph_index_size, size);
-		read_intanger_from_istream(in, &result.rigid_body_index_size, size);
+		std::size_t vertex_index_size;
+		read_intanger_from_istream(in, &vertex_index_size, size);
+		std::size_t texture_index_size;
+		read_intanger_from_istream(in, &texture_index_size, size);
+		std::size_t material_index_size;
+		read_intanger_from_istream(in, &material_index_size, size);
+		std::size_t bone_index_size;
+		read_intanger_from_istream(in, &bone_index_size, size);
+		std::size_t morph_index_size;
+		read_intanger_from_istream(in, &morph_index_size, size);
+		std::size_t rigid_body_index_size;
+		read_intanger_from_istream(in, &rigid_body_index_size, size);
 
-		return result;
+		return traits::construct(
+			version, encode, add_uv_number, vertex_index_size, texture_index_size, material_index_size, bone_index_size, morph_index_size, rigid_body_index_size
+		);
 	}
 
 	template<typename Str, typename StrSizeType = std::size_t, typename StrTraits = count_construct_container_traits<Str, StrSizeType>>
