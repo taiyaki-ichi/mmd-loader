@@ -394,7 +394,7 @@ namespace mmdl
 		}
 
 		// 要素を追加
-		static void emplace_back(std::vector<std::wstring>& texture_path, char_type const* str, std::size_t size) 
+		static void emplace_back(std::vector<std::wstring>& texture_path, char_type const* str, std::size_t size)
 		{
 			texture_path.emplace_back(str, size);
 		}
@@ -497,6 +497,80 @@ namespace mmdl
 		// 必ず3の倍数になる
 		std::int32_t vertex_number;
 
+	};
+
+	template<typename Str, typename Vec3, typename Vec4, typename TextureIndex>
+	struct pmx_material_traits<std::vector<pmx_material<Str, Vec3, Vec4, TextureIndex>>>
+	{
+		using char_type = Str::value_type;
+
+		// サイズを指定して構築
+		static std::vector<pmx_material<Str, Vec3, Vec4, TextureIndex>> construct(std::size_t size) {
+			std::vector<pmx_material<Str, Vec3, Vec4, TextureIndex>> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		// 要素を追加
+		static void emplace_back(std::vector<pmx_material<Str, Vec3, Vec4, TextureIndex>>& material,
+			char_type const* name, std::size_t name_size,
+			char_type const* english_name, std::size_t english_name_size,
+			std::array<float, 4> const& diffuse,
+			std::array<float, 3> const& specular,
+			float specularity,
+			std::array<float, 3> const& ambient,
+			// 描画フラグ 0x01:両面描画, 0x02:地面影, 0x04:セルフシャドウマップへの描画, 0x08:セルフシャドウの描画, 0x10:エッジ描画
+			std::uint8_t bit_flag,
+			std::array<float, 4> const& edge_color,
+			float edge_size,
+			std::size_t texture_index,
+			std::size_t sphere_texture_index,
+			// スフィアモード 0:無効 1:乗算(sph) 2:加算(spa) 3:サブテクスチャ(追加UV1のx,yをUV参照して通常テクスチャ描画を行う)
+			std::uint8_t sphere_mode,
+			// 共有トゥーンフラグ 
+			std::uint8_t toon_flag,
+			// 共有トゥーンフラグが0: テクスチャのインデックス
+			// 共有トゥーンフラグが1: 0..9 -> toon01.bmp...toon10.bmp に対応
+			std::size_t toon_index,
+			char_type const* memo, std::size_t memo_size,
+			// マテリアルに対応する頂点の数
+			std::size_t vertex_num
+		)
+		{
+			auto sm = [&sphere_mode]() {
+				switch (sphere_mode) {
+				case 1:
+					return sphere_mode::sph;
+				case 2:
+					return sphere_mode::spa;
+				case 3:
+					return sphere_mode::subtexture;
+				}
+
+				return sphere_mode::none;
+			}();
+
+			pmx_material<Str, Vec3, Vec4, TextureIndex> m{
+				Str(name,name_size),
+				Str(english_name,english_name_size),
+				{diffuse[0],diffuse[1],diffuse[2],diffuse[3]},
+				{specular[0],specular[1],specular[2]},
+				specularity,
+				{ambient[0],ambient[1],ambient[2]},
+				std::bitset<5>{bit_flag},
+				{edge_color[0],edge_color[1],edge_color[2],edge_color[3]},
+				edge_size,
+				static_cast<TextureIndex>(texture_index),
+				static_cast<TextureIndex>(sphere_texture_index),
+				sm,
+				toon_flag==0?toon_type::unshared:toon_type::shared,
+				toon_index,
+				Str(memo,memo_size),
+				static_cast<std::int32_t>(vertex_num),
+			};
+			
+			material.push_back(std::move(m));
+		}
 	};
 
 	enum class bone_flag

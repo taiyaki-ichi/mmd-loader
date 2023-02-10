@@ -246,115 +246,98 @@ namespace mmdl
 	}
 
 	// マテリアルの読み込み
-	template<template<typename>typename Container, typename Str, constructible_vec3 Vec3, constructible_vec4 Vec4,
-		typename TextureIndex = std::int32_t, typename HeaderDataType = std::uint8_t, typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_material<Str, Vec3, Vec4, TextureIndex>>, ContianerSizeType>,
-		typename StrTraits = count_construct_container_traits<Str, StrSizeType>>
-		Container<pmx_material<Str, Vec3, Vec4, TextureIndex>> load_material(std::istream& in, encode_type encode, HeaderDataType texture_index_size)
+	template<typename T, typename traits = pmx_material_traits<T>, std::size_t BufferSize = 64>
+	T load_material(std::istream& in, std::size_t texture_index_size)
 	{
+		using char_type = traits::char_type;
 
 		// マテリアルの数の取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
 		// コンテナの大きさ指定し構築
-		auto result = ContainerTraits::construct(num);
+		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		// 文字の大きさ
-		auto const char_size = static_cast<StrTraits::size_type>(encode);
+
+		std::int32_t name_size{};
+		char_type name[BufferSize]{};
+		std::int32_t english_name_size{};
+		char_type english_name[BufferSize]{};
+		std::array<float, 4> diffuse{};
+		std::array<float, 3> specular{};
+		float specularity{};
+		std::array<float, 3> ambient{};
+		std::uint8_t bit_flag{};
+		std::array<float, 4> edge_color{};
+		float edge_size{};
+		std::size_t texture_index{};
+		std::size_t sphere_texture_index{};
+		std::uint8_t sphere_mode{};
+		std::uint8_t toon_flag{};
+		std::size_t toon_index{};
+		std::int32_t memo_size{};
+		char_type memo[BufferSize]{};
+		std::int32_t vertex_num{};
 
 		// それぞれのマテリアルの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			// 読み込むマテリアル
-			auto& material = ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i));
-
-			// 文字列を読み込む際に使用
-			std::int32_t len;
-
 			// 名前
-			read_from_istream(in, &len);
-			material.name = StrTraits::construct(len);
-			read_array_from_istream<StrTraits>(in, &material.name, len / char_size, char_size);
+			read_from_istream(in, &name_size);
+			read_from_istream(in, name, name_size);
 
 			// 英語の名前
-			read_from_istream(in, &len);
-			material.english_name = StrTraits::construct(len);
-			read_array_from_istream<StrTraits>(in, &material.english_name, len / char_size, char_size);
+			read_from_istream(in, &english_name_size);
+			read_from_istream(in, english_name, english_name_size);
 
 			// 色情報
-			read_vec4_from_istream(in, &material.diffuse);
-			read_vec3_from_istream(in, &material.specular);
-			read_from_istream(in, &material.specularity);
-			read_vec3_from_istream(in, &material.ambient);
+			read_from_istream(in, &diffuse);
+			read_from_istream(in, &specular);
+			read_from_istream(in, &specularity);
+			read_from_istream(in, &ambient);
 
 			// 描画フラグ
-			std::uint8_t flag;
-			read_from_istream(in, &flag);
-			material.draw_flag_bits = { flag };
-
+			read_from_istream(in, &bit_flag);
+			
 			// エッジ
-			read_vec4_from_istream(in, &material.edge_color);
-			read_from_istream(in, &material.edge_size);
+			read_from_istream(in, &edge_color);
+			read_from_istream(in, &edge_size);
 
 			// テクスチャ
-			read_intanger_from_istream(in, &material.texture_index, texture_index_size);
-			read_intanger_from_istream(in, &material.sphere_texture_index, texture_index_size);
+			read_intanger_from_istream(in, &texture_index, texture_index_size);
+			read_intanger_from_istream(in, &sphere_texture_index, texture_index_size);
 
 			// スフィアモード
-			std::uint8_t sphere;
-			read_from_istream(in, &sphere);
-			switch (sphere)
-			{
-				// 無効
-			case 0:
-				material.sphere_mode_value = sphere_mode::none;
-				break;
-
-				// 乗算
-			case 1:
-				material.sphere_mode_value = sphere_mode::sph;
-				break;
-
-				// 加算
-			case 2:
-				material.sphere_mode_value = sphere_mode::spa;
-				break;
-
-				// サブテクスチャ
-			case 3:
-				material.sphere_mode_value = sphere_mode::subtexture;
-				break;
-			}
+			read_from_istream(in, &sphere_mode);
 
 			// トゥーン
-			std::uint8_t toon;
-			read_from_istream(in, &toon);
+			read_from_istream(in, &toon_flag);
 
-			switch (toon)
-			{
-				// 個別
-			case 0:
-				material.toon_type_value = toon_type::unshared;
-				read_from_istream(in, &material.toon_texture, texture_index_size);
-				break;
-
-				// 共有
-			case 1:
-				material.toon_type_value = toon_type::shared;
-				// 共有の場合のインデックスの場合のサイズは1byte
-				read_from_istream(in, &material.toon_texture, 1);
-				break;
+			// 個別トゥーンの場合
+			if (toon_flag == 0) {
+				read_intanger_from_istream(in, &toon_index, texture_index_size);
+			}
+			//共有トゥーンの場合
+			else {
+				read_intanger_from_istream(in, &toon_index, 1);
 			}
 
 			// メモ
-			read_from_istream(in, &len);
-			material.memo = StrTraits::construct(len);
-			read_array_from_istream<StrTraits>(in, &material.memo, len / char_size, char_size);
+			read_from_istream(in, &memo_size);
+			read_from_istream(in, memo, memo_size);
 
 			// 面の数
-			read_from_istream(in, &material.vertex_number);
+			read_from_istream(in, &vertex_num);
 
+			// 要素を追加
+			traits::emplace_back(result, name, name_size, english_name, english_name_size, diffuse, specular, specularity, ambient, bit_flag,
+				edge_color, edge_size, texture_index, sphere_texture_index, sphere_mode, toon_flag, toon_index, memo, memo_size, vertex_num);
+
+
+			// 初期化しておく
+			std::fill(std::begin(name), std::end(name), 0);
+			std::fill(std::begin(english_name), std::end(english_name), 0);
+			std::fill(std::begin(memo), std::end(memo), 0);
 		}
 
 		return result;

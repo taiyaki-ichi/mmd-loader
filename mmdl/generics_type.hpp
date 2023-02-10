@@ -160,6 +160,41 @@ namespace mmdl
 		static void emplace_back(T& texture_path, char_type const* str, std::size_t size);
 	};
 
+	template<typename T>
+	struct pmx_material_traits
+	{
+		using char_type = void;
+
+		// サイズを指定して構築
+		static T construct(std::size_t size);
+
+		// 要素を追加
+		static void emplace_back(T& material,
+			char_type const* name, std::size_t name_size,
+			char_type const* english_name, std::size_t english_name_size,
+			std::array<float, 4> const& diffuse,
+			std::array<float, 3> const& specular,
+			float specularity,
+			std::array<float, 3> const& ambient,
+			// 描画フラグ 0x01:両面描画, 0x02:地面影, 0x04:セルフシャドウマップへの描画, 0x08:セルフシャドウの描画, 0x10:エッジ描画
+			std::uint8_t bit_flag,
+			std::array<float, 4> const& edge_color,
+			float edge_size,
+			std::size_t texture_index,
+			std::size_t sphere_texture_index,
+			// スフィアモード 0:無効 1:乗算(sph) 2:加算(spa) 3:サブテクスチャ(追加UV1のx,yをUV参照して通常テクスチャ描画を行う)
+			std::uint8_t sphere_mode,
+			// 共有トゥーンフラグ 
+			std::uint8_t toon_flag,
+			// 共有トゥーンフラグが0: テクスチャのインデックス
+			// 共有トゥーンフラグが1: 0..9 -> toon01.bmp...toon10.bmp に対応
+			std::size_t toon_index,
+			char_type const* memo, std::size_t memo_size,
+			// マテリアルに対応する頂点の数
+			std::size_t vertex_num
+		);
+	};
+
 	// プライマリテンプレート
 	template<typename, typename>
 	struct count_construct_container_traits {};
