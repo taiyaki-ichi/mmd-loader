@@ -191,21 +191,22 @@ namespace mmdl
 	}
 
 	// –Êî•ñ‚Ì“Ç‚İ‚İ
-	template<template<typename> typename Container, typename VertexIndex = std::int32_t, typename HeaderDataType = std::uint8_t, typename ContainerSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_surface<VertexIndex>>, ContainerSizeType>>
-		Container<pmx_surface<VertexIndex>> load_surface(std::istream& in, HeaderDataType vertex_index_size)
+	template<typename T, typename traits = pmx_surface_traits<T>>
+	T load_surface(std::istream& in, std::size_t vertex_index_size)
 	{
 		// –Ê‚Ì”‚Ìæ“¾
 		std::int32_t num;
 		read_from_istream(in, &num);
 
 		// ƒRƒ“ƒeƒi‚Ì‘å‚«‚³İ’è
-		auto result = ContainerTraits::construct(static_cast<ContainerTraits::size_type>(num));
+		auto result = traits::construct(static_cast<std::size_t>(num));
 
+		std::size_t index{};
 		// ‚»‚ê‚¼‚ê‚Ìî•ñ‚ğæ“¾
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)), vertex_index_size);
+			read_intanger_from_istream(in, &index, vertex_index_size);
+			traits::emplace_back(result, index);
 		}
 
 		return result;

@@ -360,6 +360,24 @@ namespace mmdl
 	template<typename VertexIndex = std::int32_t>
 	using pmx_surface = VertexIndex;
 
+	template<typename VertexIndex>
+	struct pmx_surface_traits<std::vector<pmx_surface<VertexIndex>>>
+	{
+		// サイズを指定して構築
+		static std::vector<pmx_surface<VertexIndex>> construct(std::size_t size)
+		{
+			std::vector<pmx_surface<VertexIndex>> result{};
+			result.reserve(size);
+
+			return result;
+		}
+
+		// 要素を追加
+		static void emplace_back(std::vector<pmx_surface<VertexIndex>>& surface, std::size_t index)
+		{
+			surface.emplace_back(index);
+		}
+	};
 
 	// pmx_materialで使用
 	enum class sphere_mode

@@ -137,6 +137,17 @@ namespace mmdl
 	};
 
 
+	template<typename T>
+	struct pmx_surface_traits
+	{
+		// サイズを指定して構築
+		static T construct(std::size_t size);
+
+		// 要素を追加
+		static void emplace_back(T& surface, std::size_t index);
+	};
+
+
 	// プライマリテンプレート
 	template<typename, typename>
 	struct count_construct_container_traits {};
