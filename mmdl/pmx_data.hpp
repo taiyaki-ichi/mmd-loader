@@ -103,7 +103,26 @@ namespace mmdl
 
 	};
 
+	template<typename Str>
+	struct pmx_info_traits<pmx_info<Str>>
+	{
+		using char_type = Str::value_type;
 
+		static pmx_info<Str> construct(
+			char_type* model_name_str, std::size_t mode_name_str_size,
+			char_type* english_model_name_str, std::size_t english_mode_name_str_size,
+			char_type* comment_str, std::size_t comment_str_size,
+			char_type* english_comment_str, std::size_t english_comment_str_size
+			)
+		{
+			return {
+				Str(model_name_str,mode_name_str_size),
+				Str(english_model_name_str,english_mode_name_str_size),
+				Str(comment_str,comment_str_size),
+				Str(english_comment_str,english_comment_str_size)
+			};
+		}
+	};
 
 	// 1頂点情報
 	// ボーンのインデックスの大きさについて、pmx_header.bone_index_sizeは1,2,4の値をとる

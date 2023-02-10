@@ -31,6 +31,23 @@ namespace mmdl
 			);
 	};
 
+	template<typename T>
+	struct pmx_info_traits
+	{
+		using char_type = void;
+
+		static T construct(
+			// モデル名
+			char_type* model_name_str, std::size_t mode_name_str_size,
+			// モデル英名
+			char_type* english_model_name_str, std::size_t english_mode_name_str_size,
+			// コメント
+			char_type* comment_str, std::size_t comment_str_size,
+			// コメント英
+			char_type* english_comment_str, std::size_t english_comment_str_size
+			);
+	};
+
 
 
 

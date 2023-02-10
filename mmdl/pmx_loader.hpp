@@ -47,35 +47,46 @@ namespace mmdl
 		);
 	}
 
-	template<typename Str, typename StrSizeType = std::size_t, typename StrTraits = count_construct_container_traits<Str, StrSizeType>>
-	pmx_info<Str> load_info(std::istream& in, encode_type encode)
+	template<typename T, typename traits = pmx_info_traits<T>, std::size_t BufferSize = 512>
+	T load_info(std::istream& in)
 	{
-		pmx_info<Str> result;
+		using char_type = typename traits::char_type;
 
-		std::int32_t len;
-		auto const char_size = static_cast<std::int32_t>(encode);
+		std::int32_t model_name_size{};
+		char_type model_name_buffer[BufferSize]{};
+
+		std::int32_t english_model_name_size{};
+		char_type english_model_name_buffer[BufferSize]{};
+
+		std::int32_t comment_size{};
+		char_type comment_buffer[BufferSize]{};
+
+		std::int32_t english_comment_size{};
+		char_type english_comment_name_buffer[BufferSize]{};
+
 
 		// モデル名の取得
-		read_from_istream(in, &len);
-		result.model_name = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.model_name, len / char_size, char_size);
+		read_from_istream(in, &model_name_size);
+		read_from_istream(in, model_name_buffer, model_name_size);
 
 		// モデルの英語名の取得
-		read_from_istream(in, &len);
-		result.english_mode_name = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.english_mode_name, len / char_size, char_size);
+		read_from_istream(in, &english_model_name_size);
+		read_from_istream(in, english_model_name_buffer, english_model_name_size);
 
 		// コメントの取得
-		read_from_istream(in, &len);
-		result.comment = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.comment, len / char_size, char_size);
+		read_from_istream(in, &comment_size);
+		read_from_istream(in, comment_buffer, comment_size);
 
 		// 英語のコメントの取得
-		read_from_istream(in, &len);
-		result.english_comment = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.english_comment, len / char_size, char_size);
+		read_from_istream(in, &english_comment_size);
+		read_from_istream(in, english_comment_name_buffer, english_comment_size);
 
-		return result;
+		return traits::construct(
+			model_name_buffer, static_cast<std::size_t>(model_name_size),
+			english_model_name_buffer, static_cast<std::size_t>(english_model_name_size),
+			comment_buffer, static_cast<std::size_t>(comment_size),
+			english_comment_name_buffer, static_cast<std::size_t>(english_comment_size)
+		);
 	}
 
 
