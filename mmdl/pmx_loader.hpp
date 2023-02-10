@@ -213,31 +213,33 @@ namespace mmdl
 	}
 
 	// テクスチャパスの読み込み
-	template<template<typename> typename Container, typename Str, typename ContainerSizeType = std::size_t, typename StrSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<Str>, ContainerSizeType>, typename StrTraits = count_construct_container_traits<Str, ContainerSizeType>>
-		Container<Str> load_texture_path(std::istream& in, encode_type encode)
+	template<typename T, typename traits = pmx_texture_path_traits<T>, std::size_t BufferSize = 64>
+	T load_texture_path(std::istream& in)
 	{
+		using char_type = traits::char_type;
+
 		// コンテナのサイズの指定
 		std::int32_t num;
 		read_from_istream(in, &num);
-		auto result = ContainerTraits::construct(num);
+		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		// 文字の大きさ
-		auto const char_size = static_cast<StrTraits::size_type>(encode);
+		std::int32_t texture_path_size{};
+		char_type texture_path_buffer[BufferSize]{};
 
 		// 1文字列ごとに取得していく
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
 			// 長さの取得
-			std::int32_t len;
-			read_from_istream(in, &len);
+			read_from_istream(in, &texture_path_size);
 
 			// 文字列の読み込み
-			auto str = StrTraits::construct(static_cast<StrTraits::size_type>(len / char_size));
-			read_array_from_istream<StrTraits>(in, &str, len / char_size, char_size);
+			read_from_istream(in, texture_path_buffer, texture_path_size);
 
 			// 文字列を格納
-			ContainerTraits::get_reference(result, static_cast<StrTraits::size_type>(i)) = std::move(str);
+			traits::emplace_back(result, texture_path_buffer, static_cast<std::size_t>(texture_path_size));
+
+			// 初期化しておく
+			std::fill(std::begin(texture_path_buffer), std::end(texture_path_buffer), 0);
 		}
 
 		return result;

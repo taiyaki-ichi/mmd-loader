@@ -148,6 +148,18 @@ namespace mmdl
 	};
 
 
+	template<typename T>
+	struct pmx_texture_path_traits
+	{
+		using char_type = void;
+
+		// サイズを指定して構築
+		static T construct(std::size_t size);
+
+		// 要素を追加
+		static void emplace_back(T& texture_path, char_type const* str, std::size_t size);
+	};
+
 	// プライマリテンプレート
 	template<typename, typename>
 	struct count_construct_container_traits {};

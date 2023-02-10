@@ -5,6 +5,7 @@
 #include<bitset>
 #include"generics_type.hpp"
 #include<vector>
+#include<string>
 
 namespace mmdl
 {
@@ -378,6 +379,27 @@ namespace mmdl
 			surface.emplace_back(index);
 		}
 	};
+
+
+	template<>
+	struct pmx_texture_path_traits<std::vector<std::wstring>>
+	{
+		using char_type = std::wstring::value_type;
+
+		// サイズを指定して構築
+		static std::vector<std::wstring> construct(std::size_t size) {
+			std::vector<std::wstring> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		// 要素を追加
+		static void emplace_back(std::vector<std::wstring>& texture_path, char_type const* str, std::size_t size) 
+		{
+			texture_path.emplace_back(str, size);
+		}
+	};
+
 
 	// pmx_materialで使用
 	enum class sphere_mode
