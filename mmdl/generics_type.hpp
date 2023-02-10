@@ -125,11 +125,11 @@ namespace mmdl
 			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
 			float bone_weight_1,
 			// SDEF-C値(x,y,z)
-			std::tuple<float,float,float>&& sdef_c,
+			std::array<float, 3> const& sdef_c,
 			// SDEF-R0値(x,y,z)
-			std::tuple<float,float,float>&& sdef_r0,
+			std::array<float, 3> const& sdef_r0,
 			// SDEF-R1値(x,y,z) ※修正値を要計算
-			std::tuple<float,float,float>&& sdef_r1,
+			std::array<float, 3> const& sdef_r1,
 			// エッジ倍率
 			float edge_factor
 		);

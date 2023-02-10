@@ -91,7 +91,7 @@ namespace mmdl
 
 
 	// ’¸“_î•ñ‚Ì“Ç‚İ‚İ
-	template<typename T,typename traits=pmx_vertex_traits<T>>
+	template<typename T, typename traits = pmx_vertex_traits<T>>
 	T load_vertex(std::istream& in, std::size_t add_uv_number, std::size_t bone_index_size)
 	{
 		// ’¸“_‚Ì”‚ğæ“¾
@@ -144,7 +144,7 @@ namespace mmdl
 				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
 				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
 				read_from_istream(in, &bone_weight_1);
-				
+
 				read_from_istream(in, &edge_factor);
 				traits::emplace_back_BDEF2(result, position, normal, uv, &additional_uv[0], add_uv_number,
 					bone_index_1, bone_index_2, bone_weight_1, edge_factor);
