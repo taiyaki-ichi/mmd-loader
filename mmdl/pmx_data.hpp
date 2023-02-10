@@ -4,6 +4,7 @@
 #include<optional>
 #include<bitset>
 #include"generics_type.hpp"
+#include<vector>
 
 namespace mmdl
 {
@@ -113,7 +114,7 @@ namespace mmdl
 			char_type* english_model_name_str, std::size_t english_mode_name_str_size,
 			char_type* comment_str, std::size_t comment_str_size,
 			char_type* english_comment_str, std::size_t english_comment_str_size
-			)
+		)
 		{
 			return {
 				Str(model_name_str,mode_name_str_size),
@@ -162,6 +163,194 @@ namespace mmdl
 		float edge_magnification;
 
 	};
+
+	template<typename Vec2, typename Vec3, typename Vec4, typename BoneIndex>
+	struct pmx_vertex_traits<std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>>
+	{
+		// サイズを指定して構築
+		static std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> construct(std::size_t size) {
+
+			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		// BDEF1形式のボーンの追加
+		static void emplace_back_BDEF1(
+			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
+			std::array<float, 3> const& position,
+			std::array<float, 3> const& normal,
+			std::array<float, 2> const& uv,
+			std::array<float, 4>* add_uv, std::size_t add_uv_size,
+			// ウェイト1.0の単一ボーン
+			std::size_t bone_index_1,
+			// エッジ倍率
+			float edge_factor
+		)
+		{
+			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
+
+			v.position = { position[0],position[1] ,position[2] };
+			v.normal = { normal[0],normal[1] ,normal[2] };
+			v.uv = { uv[0],uv[1] };
+
+			for (std::size_t i = 0; i < add_uv_size; i++)
+			{
+				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
+			}
+
+			v.bone[0] = bone_index_1;
+			v.weight[0] = 1.f;
+
+			v.edge_magnification = edge_factor;
+
+			vertex.emplace_back(std::move(v));
+		}
+
+		// BDEF2形式のボーンの追加
+		static void emplace_back_BDEF2(
+			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
+			std::array<float, 3> const& position,
+			std::array<float, 3> const& normal,
+			std::array<float, 2> const& uv,
+			std::array<float, 4>* add_uv, std::size_t add_uv_size,
+			// ボーン1のインデックス
+			std::size_t bone_index_1,
+			// ボーン2のインデックス
+			std::size_t bone_index_2,
+			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
+			float bone_weight_1,
+			// エッジ倍率
+			float edge_factor
+		)
+		{
+			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
+
+			v.position = { position[0],position[1] ,position[2] };
+			v.normal = { normal[0],normal[1] ,normal[2] };
+			v.uv = { uv[0],uv[1] };
+
+			for (std::size_t i = 0; i < add_uv_size; i++)
+			{
+				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
+			}
+
+			v.bone[0] = bone_index_1;
+			v.bone[1] = bone_index_2;
+			v.weight[0] = bone_weight_1;
+			v.weight[1] = 1.f - bone_weight_1;
+
+			v.edge_magnification = edge_factor;
+
+			vertex.emplace_back(std::move(v));
+		}
+
+		// BDEF4形式のボーンの追加
+		static void emplace_back_BDEF4(
+			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
+			std::array<float, 3> const& position,
+			std::array<float, 3> const& normal,
+			std::array<float, 2> const& uv,
+			std::array<float, 4>* add_uv, std::size_t add_uv_size,
+			// ボーン1のインデックス
+			std::size_t bone_index_1,
+			// ボーン2のインデックス
+			std::size_t bone_index_2,
+			// ボーン3のインデックス
+			std::size_t bone_index_3,
+			// ボーン4のインデックス
+			std::size_t bone_index_4,
+			// ボーン1のウェイト
+			float bone_weight_1,
+			// ボーン2のウェイト
+			float bone_weight_2,
+			// ボーン3のウェイト
+			float bone_weight_3,
+			// ボーン4のウェイト（ウェイトの合計について1の保証はない）
+			float bone_weight_4,
+			// エッジ倍率
+			float edge_factor
+		)
+		{
+			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
+
+			v.position = { position[0],position[1] ,position[2] };
+			v.normal = { normal[0],normal[1] ,normal[2] };
+			v.uv = { uv[0],uv[1] };
+
+			for (std::size_t i = 0; i < add_uv_size; i++)
+			{
+				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
+			}
+
+			v.bone[0] = bone_index_1;
+			v.bone[1] = bone_index_2;
+			v.bone[2] = bone_index_3;
+			v.bone[3] = bone_index_4;
+			auto weight_sum = bone_weight_1 + bone_index_2 + bone_index_3 + bone_index_4;
+			v.weight[0] = bone_weight_1 / weight_sum;
+			v.weight[1] = bone_weight_2 / weight_sum;
+			v.weight[2] = bone_weight_3 / weight_sum;
+			v.weight[3] = bone_weight_4 / weight_sum;
+
+			v.edge_magnification = edge_factor;
+
+			vertex.emplace_back(std::move(v));
+		}
+
+		// SDEF形式のボーンの追加
+		static void emplace_back_SDEF(
+			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
+			std::array<float, 3> const& position,
+			std::array<float, 3> const& normal,
+			std::array<float, 2> const& uv,
+			std::array<float, 4>* add_uv, std::size_t add_uv_size,
+			// ボーン1のインデックス
+			std::size_t bone_index_1,
+			// ボーン2のインデックス
+			std::size_t bone_index_2,
+			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
+			float bone_weight_1,
+			// SDEF-C値(x,y,z)
+			std::array<float, 3> const& sdef_c,
+			// SDEF-R0値(x,y,z)
+			std::array<float, 3> const& sdef_r0,
+			// SDEF-R1値(x,y,z) ※修正値を要計算
+			std::array<float, 3> const& sdef_r1,
+			// エッジ倍率
+			float edge_factor
+		)
+		{
+			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
+
+			v.position = { position[0],position[1] ,position[2] };
+			v.normal = { normal[0],normal[1] ,normal[2] };
+			v.uv = { uv[0],uv[1] };
+
+			for (std::size_t i = 0; i < add_uv_size; i++)
+			{
+				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
+			}
+
+			v.bone[0] = bone_index_1;
+			v.bone[1] = bone_index_2;
+			v.weight[0] = bone_weight_1;
+			v.weight[1] = 1.f - bone_weight_1;
+
+			std::array<Vec3, 3> sdef{ {
+				{sdef_c[0],sdef_c[1],sdef_c[2]},
+				{sdef_r0[0],sdef_r0[1],sdef_r0[2]},
+				{sdef_r1[0],sdef_r1[1],sdef_r1[2]}
+			} };
+			v.sdef = sdef;
+
+			v.edge_magnification = edge_factor;
+
+			vertex.emplace_back(std::move(v));
+		}
+
+	};
+
 
 
 	// 面を構成する頂点の情報

@@ -91,29 +91,37 @@ namespace mmdl
 
 
 	// 頂点情報の読み込み
-	template<template<typename> typename Container, constructible_vec2 Vec2, constructible_vec3 Vec3, constructible_vec4 Vec4,
-		typename BoneIndex = std::int32_t, typename  HeaderDataType = std::uint8_t, typename ContainterSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, ContainterSizeType>>
-		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderDataType add_uv_number, HeaderDataType bone_index_size)
+	template<typename T,typename traits=pmx_vertex_traits<T>>
+	T load_vertex(std::istream& in, std::size_t add_uv_number, std::size_t bone_index_size)
 	{
 		// 頂点の数を取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
-		// コンテナの生成
-		auto result = ContainerTraits::construct(static_cast<ContainerTraits::size_type>(num));
+		auto result = traits::construct(static_cast<std::size_t>(num));
+
+		std::array<float, 3> position{};
+		std::array<float, 3> normal{};
+		std::array<float, 2> uv{};
+		std::array<std::array<float, 4>, 4> additional_uv{};
+		std::size_t bone_index_1{}, bone_index_2{}, bone_index_3{}, bone_index_4{};
+		float bone_weight_1{}, bone_weight_2{}, bone_weight_3{}, bone_weight_4{};
+		std::array<float, 3> sdef_c{};
+		std::array<float, 3> sdef_r0{};
+		std::array<float, 3> sdef_r1{};
+		float edge_factor{};
 
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			read_vec3_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).position);
-			read_vec3_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).normal);
-			read_vec2_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).uv);
+			read_from_istream(in, &position);
+			read_from_istream(in, &normal);
+			read_from_istream(in, &uv);
 
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				read_vec4_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).additional_uv[j]);
+				read_from_istream(in, &additional_uv[i]);
 			}
 
 			// ウェイト変形方式の取得
@@ -124,50 +132,62 @@ namespace mmdl
 			{
 				// BDEF1の場合
 			case 0:
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[0], bone_index_size);
-				// 単一のボーンの重みが1であることを示す
-				ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0] = 1.f;
+				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
+
+				read_from_istream(in, &edge_factor);
+				traits::emplace_back_BDEF1(result, position, normal, uv, &additional_uv[0], add_uv_number,
+					bone_index_1, edge_factor);
 				break;
 
 				// BDEF2の場合
 			case 1:
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[1], bone_index_size);
-				read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0]);
-				// 2本のボーンの重みは合計1になる
-				ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[1] = 1.f - ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0];
+				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
+				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
+				read_from_istream(in, &bone_weight_1);
+				
+				read_from_istream(in, &edge_factor);
+				traits::emplace_back_BDEF2(result, position, normal, uv, &additional_uv[0], add_uv_number,
+					bone_index_1, bone_index_2, bone_weight_1, edge_factor);
 				break;
 
 				// BDEF4の場合
 			case 2:
-				// 4つのボーンのインデックスの取得
-				for (std::size_t j = 0; j < 4; j++)
-					read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[j], bone_index_size);
-				// 4つのボーンの重みの取得
-				for (std::size_t j = 0; j < 4; j++)
-					read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[j]);
+				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
+				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
+				read_intanger_from_istream(in, &bone_index_3, bone_index_size);
+				read_intanger_from_istream(in, &bone_index_4, bone_index_size);
+
+				read_from_istream(in, &bone_weight_1);
+				read_from_istream(in, &bone_weight_2);
+				read_from_istream(in, &bone_weight_3);
+				read_from_istream(in, &bone_weight_4);
+
+				read_from_istream(in, &edge_factor);
+				traits::emplace_back_BDEF4(result, position, normal, uv, &additional_uv[0], add_uv_number,
+					bone_index_1, bone_index_2, bone_index_3, bone_index_4, bone_weight_1, bone_weight_2, bone_weight_3, bone_weight_4, edge_factor);
 				break;
 
 				// SDEFの倍
 			case 3:
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[1], bone_index_size);
-				read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0]);
+				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
+				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
+				read_from_istream(in, &bone_weight_1);
 				// ここまでBDEF2と同じ
-				std::array<Vec3, 3> sdef;
-				for (std::size_t j = 0; j < 3; j++)
-					read_from_istream(in, &sdef[j]);
-				ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).sdef = std::move(sdef);
+
+
+				read_from_istream(in, &sdef_c);
+				read_from_istream(in, &sdef_r0);
+				read_from_istream(in, &sdef_r1);
+
+				read_from_istream(in, &edge_factor);
+				traits::emplace_back_SDEF(result, position, normal, uv, &additional_uv[0], add_uv_number,
+					bone_index_1, bone_index_2, bone_weight_1, sdef_c, sdef_r0, sdef_r1, edge_factor);
+
 				break;
 			}
-
-			// エッジ倍率の取得
-			read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).edge_magnification);
-
 		}
 
 		return result;
-
 	}
 
 	// 面情報の読み込み
