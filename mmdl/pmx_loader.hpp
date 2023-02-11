@@ -236,7 +236,8 @@ namespace mmdl
 			read_from_istream(in, texture_path_buffer, texture_path_size);
 
 			// 文字列を格納
-			traits::emplace_back(result, texture_path_buffer, static_cast<std::size_t>(texture_path_size));
+			traits::emplace_back(result, texture_path_buffer, 
+				texture_path_size % 2 == 0 ? texture_path_size / sizeof(char_type) : (texture_path_size + 1) / sizeof(char_type));
 
 			// 初期化しておく
 			std::fill(std::begin(texture_path_buffer), std::end(texture_path_buffer), 0);
@@ -298,7 +299,7 @@ namespace mmdl
 
 			// 描画フラグ
 			read_from_istream(in, &bit_flag);
-			
+
 			// エッジ
 			read_from_istream(in, &edge_color);
 			read_from_istream(in, &edge_size);
@@ -330,8 +331,10 @@ namespace mmdl
 			read_from_istream(in, &vertex_num);
 
 			// 要素を追加
-			traits::emplace_back(result, name, name_size, english_name, english_name_size, diffuse, specular, specularity, ambient, bit_flag,
-				edge_color, edge_size, texture_index, sphere_texture_index, sphere_mode, toon_flag, toon_index, memo, memo_size, vertex_num);
+			traits::emplace_back(result, name, name_size % 2 == 0 ? name_size / sizeof(char_type) : (name_size + 1) / sizeof(char_type),
+				english_name, english_name_size % 2 == 0 ? english_name_size / sizeof(char_type) : (english_name_size + 1) / sizeof(char_type),
+				diffuse, specular, specularity, ambient, bit_flag, edge_color, edge_size, texture_index, sphere_texture_index,
+				sphere_mode, toon_flag, toon_index, memo, memo_size, vertex_num);
 
 
 			// 初期化しておく
@@ -345,129 +348,156 @@ namespace mmdl
 	}
 
 	// ボーンの読み込み
-	template<template<typename>typename Container, typename Str, typename Vec3, template<typename> typename IKContainer, typename BoneIndex = std::int32_t, typename HeaderDataType = std::uint8_t,
-		typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t, typename IKContainerSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_bone<Str, Vec3, IKContainer, BoneIndex>>, ContianerSizeType>,
-		typename StrTraits = count_construct_container_traits<Str, StrSizeType>,
-		typename IKContainerTraits = count_construct_container_traits<IKContainer<ik_link<Vec3, BoneIndex>>, IKContainerSizeType>>
-		Container<pmx_bone<Str, Vec3, IKContainer, BoneIndex>> load_bone(std::istream& in, encode_type encode, HeaderDataType bone_index_size)
+	template<typename T, typename traits = pmx_bone_traits<T>, std::size_t BufferNum = 64, std::size_t IKLinkBufferNum = 16>
+	T load_bone(std::istream& in, std::size_t bone_index_size)
 	{
+		using char_type = traits::char_type;
+
 		// ボーンの数の取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
 		// コンテナの大きさ指定し構築
-		auto result = ContainerTraits::construct(num);
+		auto result = traits::construct(num);
 
-		// 文字の大きさ
-		auto const char_size = static_cast<StrTraits::size_type>(encode);
+		std::int32_t name_size{};
+		char_type name[BufferNum]{};
+		std::int32_t english_name_size{};
+		char_type english_name[BufferNum]{};
+		std::array<float, 3> position{};
+		std::size_t parent_bone_index{};
+		std::int32_t transformation_level{};
+		std::uint16_t bone_flag{};
+		std::array<float, 3> access_point_offset{};
+		std::size_t access_bone_index{};
+		std::size_t assign_bone_index{};
+		float assign_rate{};
+		std::array<float, 3> fixed_axis_direction{};
+		std::array<float, 3> local_x_axis_direction{};
+		std::array<float, 3> local_z_axis_direction{};
+		std::int32_t key_value{};
+		std::size_t ik_target_bone{};
+		std::int32_t ik_loop_num{};
+		float ik_angle_limit_par_process{};
+		std::int32_t ik_link_size{};
+		std::tuple<std::size_t, std::uint8_t, std::array<float, 3>, std::array<float, 3>> ik_link[IKLinkBufferNum]{};
+
 
 		// それぞれのボーンの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			// 読み込むボーン
-			auto& bone = ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i));
-
-			// 文字列を読み込む際に使用
-			std::int32_t len;
-
 			// 名前
-			read_from_istream(in, &len);
-			bone.name = StrTraits::construct(static_cast<StrTraits::size_type>(len / char_size));
-			read_array_from_istream<StrTraits>(in, &bone.name, len / char_size, char_size);
+			read_from_istream(in, &name_size);
+			read_from_istream(in, name, name_size);
 
 			// 英語の名前
-			read_from_istream(in, &len);
-			bone.english_name = StrTraits::construct(static_cast<StrTraits::size_type>(len / char_size));
-			read_array_from_istream<StrTraits>(in, &bone.english_name, len / char_size, char_size);
+			read_from_istream(in, &english_name_size);
+			read_from_istream(in, english_name, english_name_size);
 
 			// 位置
-			read_vec3_from_istream(in, &bone.position);
+			read_from_istream(in, &position);
 
 			// 親ボーン
-			read_intanger_from_istream(in, &bone.parent_index, bone_index_size);
+			read_from_istream(in, &parent_bone_index, bone_index_size);
 
 			// 変形階層
-			read_from_istream(in, &bone.trannsformation_level);
+			read_from_istream(in, &transformation_level);
 
 			// ボーンフラグ
-			std::uint16_t bone_flag{};
 			read_from_istream(in, &bone_flag);
-			bone.bone_flag_bits = { bone_flag };
 
-			// 接続
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::access_point)])
+			// 接続先
+			if ((bone_flag & 0x0001) == 0)
 			{
-				read_intanger_from_istream(in, &bone.access_point_index, bone_index_size);
+				read_from_istream(in, &access_point_offset);
 			}
 			else
 			{
-				read_vec3_from_istream(in, &bone.access_point_offset);
+				read_intanger_from_istream(in, &access_bone_index, bone_index_size);
 			}
 
 			// 回転付与または移動付与
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::rotation_grant)] ||
-				bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::move_grant)])
+			if ((bone_flag & 0x0100) != 0 || (bone_flag & 0x0200) != 0)
 			{
-				read_intanger_from_istream(in, &bone.grant_index, bone_index_size);
-				read_from_istream(in, &bone.grant_rate);
+				read_intanger_from_istream(in, &assign_bone_index, bone_index_size);
+				read_from_istream(in, &assign_rate);
 			}
 
 			// 軸固定
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::fix_axis)])
+			if ((bone_flag & 0x0400) != 0)
 			{
-				read_vec3_from_istream(in, &bone.fix_axis_direction);
+				read_from_istream(in, &fixed_axis_direction);
 			}
 
 			// ローカル軸
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::local_axis)])
+			if ((bone_flag & 0x0800) != 0)
 			{
-				read_vec3_from_istream(in, &bone.local_axis_x);
-				read_vec3_from_istream(in, &bone.local_axis_z);
+				read_from_istream(in, &local_x_axis_direction);
+				read_from_istream(in, &local_z_axis_direction);
 			}
 
 			// 外部親変形
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::external_parent_deformation)])
+			if ((bone_flag & 0x2000) != 0)
 			{
-				read_from_istream(in, &bone.external_parent_deformation_key);
+				read_from_istream(in, &key_value);
 			}
 
 			// IK
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::ik)])
+			if ((bone_flag & 0x0020) != 0)
 			{
-				read_intanger_from_istream(in, &bone.ik_target_bone, bone_index_size);
-				read_from_istream(in, &bone.ik_roop_number);
-				read_from_istream(in, &bone.ik_rook_angle);
+				read_intanger_from_istream(in, &ik_target_bone, bone_index_size);
+				read_from_istream(in, &ik_loop_num);
+				read_from_istream(in, &ik_angle_limit_par_process);
 
 				// IK数の取得
-				std::int32_t ik_num;
-				read_from_istream(in, &ik_num);
+				read_from_istream(in, &ik_link_size);
 
-				// コンテナの大きさ指定
-				bone.ik_link = IKContainerTraits::construct(ik_num);
-
-				for (std::size_t j = 0; j < ik_num; j++)
+				for (std::size_t j = 0; j < ik_link_size; j++)
 				{
-					read_intanger_from_istream(in, &bone.ik_link[j].bone, bone_index_size);
+					auto& [ik_bone_index, ik_is_angle_limit, ik_angle_limit_bottom, ik_angle_limit_top] = ik_link[i];
+
+					read_intanger_from_istream(in, &ik_bone_index, bone_index_size);
 
 					// 角度制限
-					std::uint8_t is_angle_limit;
-					read_from_istream(in, &is_angle_limit);
+					read_from_istream(in, &ik_is_angle_limit);
 
-					if (is_angle_limit == 1)
+					if (ik_is_angle_limit == 1)
 					{
 						// 下限
-						Vec3 min;
-						read_vec3_from_istream(in, &min);
+						read_from_istream(in, &ik_angle_limit_bottom);
 
 						// 上限
-						Vec3 max;
-						read_vec3_from_istream(in, &max);
-
-						bone.ik_link[j].min_max_angle_limit = { std::move(min),std::move(max) };
+						read_from_istream(in, &ik_angle_limit_top);
 					}
 				}
 			}
+
+			// 要素の追加
+			traits::emplace_back(result,
+				name, name_size % 2 == 0 ? name_size / sizeof(char_type) : (name_size + 1) / sizeof(char_type),
+				english_name, english_name_size % 2 == 0 ? english_name_size / sizeof(char_type) : (english_name_size + 1) / sizeof(char_type),
+				position,
+				parent_bone_index,
+				transformation_level,
+				bone_flag,
+				access_point_offset,
+				access_bone_index,
+				assign_bone_index,
+				assign_rate,
+				fixed_axis_direction,
+				local_x_axis_direction,
+				local_z_axis_direction,
+				key_value,
+				ik_target_bone,
+				ik_loop_num,
+				ik_angle_limit_par_process,
+				ik_link_size,
+				ik_link
+			);
+
+			// 初期化しておく
+			std::fill(std::begin(name), std::end(name), 0);
+			std::fill(std::begin(english_name), std::end(english_name), 0);
 		}
 
 		return result;
