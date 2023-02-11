@@ -454,7 +454,7 @@ namespace mmdl
 
 				for (std::size_t j = 0; j < ik_link_size; j++)
 				{
-					auto& [ik_bone_index, ik_is_angle_limit, ik_angle_limit_bottom, ik_angle_limit_top] = ik_link[i];
+					auto& [ik_bone_index, ik_is_angle_limit, ik_angle_limit_bottom, ik_angle_limit_top] = ik_link[j];
 
 					read_intanger_from_istream(in, &ik_bone_index, bone_index_size);
 
