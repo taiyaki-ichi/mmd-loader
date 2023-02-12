@@ -61,7 +61,7 @@ namespace mmdl
 		static T construct(std::size_t size);
 
 		// —v‘f‚ð––”ö‚É’Ç‰Á
-		static void emplace_back(T& vertex, pmx_vertex_buffer const&);
+		static void emplace_back(T& model_vertex_data, pmx_vertex_buffer const&, std::uint8_t additional_uv_num);
 	};
 
 	template<>
@@ -73,8 +73,8 @@ namespace mmdl
 			return result;
 		}
 
-		static void emplace_back(std::vector<pmx_vertex_buffer>& vertex, pmx_vertex_buffer const& buffer) {
-			vertex.emplace_back(buffer);
+		static void emplace_back(std::vector<pmx_vertex_buffer>& model_vertex_data, pmx_vertex_buffer const& buffer) {
+			model_vertex_data.emplace_back(buffer);
 		}
 	};
 
@@ -143,7 +143,7 @@ namespace mmdl
 		static void emplace_back(T& material, pmx_material_buffer<char_type, CharBufferSize> const&);
 	};
 
-	template<typename CharType,std::size_t CharBufferSize>
+	template<typename CharType, std::size_t CharBufferSize>
 	struct pmx_material_traits<std::vector<pmx_material_buffer<CharType, CharBufferSize>>>
 	{
 		using char_type = CharType;
@@ -189,7 +189,7 @@ namespace mmdl
 		}
 
 		static void emplace_back(std::vector<pmx_bone_buffer<CharType, CharBufferSize, IKLinkBufferSize>>& bone,
-			pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const& buffer) 
+			pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const& buffer)
 		{
 			bone.emplace_back(buffer);
 		}

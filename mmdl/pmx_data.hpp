@@ -171,7 +171,7 @@ namespace mmdl
 			return result;
 		}
 
-		static void emplace_back(std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex, pmx_vertex_buffer const& buffer, std::uint8_t additional_uv_num)
+		static void emplace_back(std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& model_vertex_data, pmx_vertex_buffer const& buffer, std::uint8_t additional_uv_num)
 		{
 			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
 
@@ -236,7 +236,7 @@ namespace mmdl
 
 			v.edge_magnification = buffer.edge_factor;
 
-			vertex.emplace_back(std::move(v));
+			model_vertex_data.emplace_back(std::move(v));
 		}
 
 	};
