@@ -6,11 +6,29 @@
 
 namespace mmdl
 {
+
+	//
+	// header
+	//
+
 	template<typename T>
 	struct pmx_header_traits
 	{
 		static T construct(pmx_header_buffer const&);
 	};
+
+	template<>
+	struct pmx_header_traits<pmx_header_buffer>
+	{
+		static pmx_header_buffer construct(pmx_header_buffer const& buffer) {
+			return buffer;
+		}
+	};
+
+
+	//
+	// info
+	//
 
 	template<typename T>
 	struct pmx_info_traits
@@ -20,6 +38,21 @@ namespace mmdl
 		template<std::size_t CharBufferSize>
 		static T construct(pmx_info_buffer<char_type, CharBufferSize> const&);
 	};
+
+	template<typename CharType, std::size_t CharBufferSize>
+	struct pmx_info_traits<pmx_info_buffer<CharType, CharBufferSize>>
+	{
+		using char_type = CharType;
+
+		static pmx_info_buffer<char_type, CharBufferSize> construct(pmx_info_buffer<char_type, CharBufferSize> const& buffer) {
+			return buffer;
+		}
+	};
+
+
+	//
+	// vertex
+	//
 
 	template<typename T>
 	struct pmx_vertex_traits
@@ -31,6 +64,24 @@ namespace mmdl
 		static void emplace_back(T& vertex, pmx_vertex_buffer const&);
 	};
 
+	template<>
+	struct pmx_vertex_traits<std::vector<pmx_vertex_buffer>>
+	{
+		static std::vector<pmx_vertex_buffer> construct(std::size_t size) {
+			std::vector<pmx_vertex_buffer> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		static void emplace_back(std::vector<pmx_vertex_buffer>& vertex, pmx_vertex_buffer const& buffer) {
+			vertex.emplace_back(buffer);
+		}
+	};
+
+
+	//
+	// surface
+	//
 
 	template<typename T>
 	struct pmx_surface_traits
@@ -42,6 +93,24 @@ namespace mmdl
 		static void emplace_back(T& surface, std::size_t index);
 	};
 
+	template<>
+	struct pmx_surface_traits<std::vector<std::size_t>>
+	{
+		static std::vector<std::size_t> construct(std::size_t size) {
+			std::vector<std::size_t> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		static void emplace_back(std::vector<std::size_t>& surface, std::size_t index) {
+			surface.emplace_back(index);
+		}
+	};
+
+
+	//
+	// texture_path
+	//
 
 	template<typename T>
 	struct pmx_texture_path_traits
@@ -56,6 +125,11 @@ namespace mmdl
 		static void emplace_back(T& texture_path, std::size_t size, std::array<char_type, CharBufferSize> const& str);
 	};
 
+
+	//
+	// material
+	//
+
 	template<typename T>
 	struct pmx_material_traits
 	{
@@ -69,6 +143,27 @@ namespace mmdl
 		static void emplace_back(T& material, pmx_material_buffer<char_type, CharBufferSize> const&);
 	};
 
+	template<typename CharType,std::size_t CharBufferSize>
+	struct pmx_material_traits<std::vector<pmx_material_buffer<CharType, CharBufferSize>>>
+	{
+		using char_type = CharType;
+
+		static std::vector<pmx_material_buffer<CharType, CharBufferSize>> construct(std::size_t size) {
+			std::vector<pmx_material_buffer<CharType, CharBufferSize>> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		static void emplace_back(std::vector<pmx_material_buffer<CharType, CharBufferSize>>& material, pmx_material_buffer<char_type, CharBufferSize> const& buffer) {
+			material.emplace_back(buffer);
+		}
+	};
+
+
+	//
+	// bone
+	//
+
 	template<typename T>
 	struct pmx_bone_traits
 	{
@@ -78,8 +173,26 @@ namespace mmdl
 		static T construct(std::size_t size);
 
 		// —v‘f‚ð’Ç‰Á
-		template<std::size_t CharBufferSize, std::size_t IKLinkBufferSize >
+		template<std::size_t CharBufferSize, std::size_t IKLinkBufferSize>
 		static void emplace_back(T& bone, pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const&);
+	};
+
+	template<typename CharType, std::size_t CharBufferSize, std::size_t IKLinkBufferSize>
+	struct pmx_bone_traits<std::vector<pmx_bone_buffer<CharType, CharBufferSize, IKLinkBufferSize>>>
+	{
+		using char_type = CharType;
+
+		static std::vector<pmx_bone_buffer<CharType, CharBufferSize, IKLinkBufferSize>> construct(std::size_t size) {
+			std::vector<pmx_bone_buffer<CharType, CharBufferSize, IKLinkBufferSize>> result{};
+			result.reserve(size);
+			return result;
+		}
+
+		static void emplace_back(std::vector<pmx_bone_buffer<CharType, CharBufferSize, IKLinkBufferSize>>& bone,
+			pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const& buffer) 
+		{
+			bone.emplace_back(buffer);
+		}
 	};
 
 
