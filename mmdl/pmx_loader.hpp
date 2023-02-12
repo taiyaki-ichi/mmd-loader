@@ -142,6 +142,13 @@ namespace mmdl
 			read_from_istream(in, &buffer.edge_factor);
 
 			traits::emplace_back(result, buffer, add_uv_number);
+
+			// ˆê‰A‰Šú‰»‚µ‚Ä‚¨‚­
+			buffer.bone_index = {};
+			buffer.bone_weight = {};
+			buffer.sdef_c = {};
+			buffer.sdef_r0 = {};
+			buffer.sdef_r1 = {};
 		}
 
 		return result;
