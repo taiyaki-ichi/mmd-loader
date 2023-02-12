@@ -200,8 +200,8 @@ namespace mmdl
 			read_from_istream(in, &texture_path_buffer[0], texture_path_size);
 
 			// •¶š—ñ‚ğŠi”[
-			traits::emplace_back(result, texture_path_buffer,
-				texture_path_size % 2 == 0 ? texture_path_size / sizeof(char_type) : (texture_path_size + 1) / sizeof(char_type));
+			traits::emplace_back(result,
+				texture_path_size % 2 == 0 ? texture_path_size / sizeof(char_type) : (texture_path_size + 1) / sizeof(char_type), texture_path_buffer);
 
 			// ‰Šú‰»‚µ‚Ä‚¨‚­
 			std::fill(std::begin(texture_path_buffer), std::end(texture_path_buffer), 0);

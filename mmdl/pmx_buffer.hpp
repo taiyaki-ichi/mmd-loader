@@ -239,3 +239,4 @@ namespace mmdl
 		std::array<ik_link_type, IKLinkBufferNum> ik_link{};
 	};
 }
+
