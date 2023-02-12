@@ -401,33 +401,11 @@ namespace mmdl
 		}
 
 		// 要素を追加
-		static void emplace_back(std::vector<pmx_material<Str, Vec3, Vec4, TextureIndex>>& material,
-			char_type const* name, std::size_t name_size,
-			char_type const* english_name, std::size_t english_name_size,
-			std::array<float, 4> const& diffuse,
-			std::array<float, 3> const& specular,
-			float specularity,
-			std::array<float, 3> const& ambient,
-			// 描画フラグ 0x01:両面描画, 0x02:地面影, 0x04:セルフシャドウマップへの描画, 0x08:セルフシャドウの描画, 0x10:エッジ描画
-			std::uint8_t bit_flag,
-			std::array<float, 4> const& edge_color,
-			float edge_size,
-			std::size_t texture_index,
-			std::size_t sphere_texture_index,
-			// スフィアモード 0:無効 1:乗算(sph) 2:加算(spa) 3:サブテクスチャ(追加UV1のx,yをUV参照して通常テクスチャ描画を行う)
-			std::uint8_t sphere_mode,
-			// 共有トゥーンフラグ 
-			std::uint8_t toon_flag,
-			// 共有トゥーンフラグが0: テクスチャのインデックス
-			// 共有トゥーンフラグが1: 0..9 -> toon01.bmp...toon10.bmp に対応
-			std::size_t toon_index,
-			char_type const* memo, std::size_t memo_size,
-			// マテリアルに対応する頂点の数
-			std::size_t vertex_num
-		)
+		template<typename CharType, std::size_t CharBufferSize>
+		static void emplace_back(std::vector<pmx_material<Str, Vec3, Vec4, TextureIndex>>& material, pmx_material_buffer<CharType, CharBufferSize> const& buffer)
 		{
-			auto sm = [&sphere_mode]() {
-				switch (sphere_mode) {
+			auto sm = [&buffer]() {
+				switch (buffer.sphere_mode) {
 				case 1:
 					return sphere_mode::sph;
 				case 2:
@@ -440,22 +418,22 @@ namespace mmdl
 			}();
 
 			pmx_material<Str, Vec3, Vec4, TextureIndex> m{
-				Str(name,name_size),
-				Str(english_name,english_name_size),
-				{diffuse[0],diffuse[1],diffuse[2],diffuse[3]},
-				{specular[0],specular[1],specular[2]},
-				specularity,
-				{ambient[0],ambient[1],ambient[2]},
-				std::bitset<5>{bit_flag},
-				{edge_color[0],edge_color[1],edge_color[2],edge_color[3]},
-				edge_size,
-				static_cast<TextureIndex>(texture_index),
-				static_cast<TextureIndex>(sphere_texture_index),
+				Str(&buffer.name[0],buffer.name_size),
+				Str(&buffer.english_name[0],buffer.english_name_size),
+				{buffer.diffuse[0],buffer.diffuse[1],buffer.diffuse[2],buffer.diffuse[3]},
+				{buffer.specular[0],buffer.specular[1],buffer.specular[2]},
+				buffer.specularity,
+				{buffer.ambient[0],buffer.ambient[1],buffer.ambient[2]},
+				std::bitset<5>{buffer.bit_flag},
+				{buffer.edge_color[0],buffer.edge_color[1],buffer.edge_color[2],buffer.edge_color[3]},
+				buffer.edge_size,
+				static_cast<TextureIndex>(buffer.texture_index),
+				static_cast<TextureIndex>(buffer.sphere_texture_index),
 				sm,
-				toon_flag == 0 ? toon_type::unshared : toon_type::shared,
-				toon_index,
-				Str(memo,memo_size),
-				static_cast<std::int32_t>(vertex_num),
+				buffer.toon_flag == 0 ? toon_type::unshared : toon_type::shared,
+				buffer.toon_index,
+				Str(&buffer.memo[0], buffer.memo_size),
+				static_cast<std::int32_t>(buffer.vertex_num),
 			};
 
 			material.push_back(std::move(m));

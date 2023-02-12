@@ -97,4 +97,68 @@ namespace mmdl
 		// エッジ倍率
 		float edge_factor{};
 	};
+
+
+	template<typename CharType, std::size_t CharBufferSize>
+	struct pmx_material_buffer
+	{
+		// マテリアルの名前
+		std::int32_t name_size{};
+		std::array<CharType,CharBufferSize> name{};
+
+		// 英語のマテリアルの名前
+		std::int32_t english_name_size{};
+		std::array<CharType, CharBufferSize> english_name{};
+
+		// ディフューズ
+		std::array<float, 4> diffuse{};
+		// スぺキュラ
+		std::array<float, 3> specular{};
+		// スぺキュラ係数
+		float specularity{};
+		// アンビエント
+		std::array<float, 3> ambient{};
+
+		/*
+		描画フラグ 
+			0x01:両面描画 
+			0x02:地面影
+			0x04:セルフシャドウマップへの描画
+			0x08:セルフシャドウの描画
+			0x10:エッジ描画
+		*/
+		std::uint8_t bit_flag{};
+
+		// エッジの色
+		std::array<float, 4> edge_color{};
+		// エッジの大きさ
+		float edge_size{};
+
+		// 通常のテクスチャのインデックス
+		std::size_t texture_index{};
+		// スフィアテクスチャのインデックス
+		std::size_t sphere_texture_index{};
+		
+		/*
+		スフィアモード 
+			0:無効 
+			1:乗算(sph) 
+			2:加算(spa) 3:サブテクスチャ(追加UV1のx,yをUV参照して通常テクスチャ描画を行う)
+		*/
+		std::uint8_t sphere_mode{};
+
+		// 共有トゥーンフラグ 
+		std::uint8_t toon_flag{};
+		// 共有トゥーンフラグが0: テクスチャのインデックス
+		// 共有トゥーンフラグが1: 0..9 -> toon01.bmp...toon10.bmp に対応
+		std::size_t toon_index{};
+
+		// メモ
+		std::int32_t memo_size{};
+		std::array<CharType, CharBufferSize> memo{};
+
+		// マテリアルの対応する頂点の数
+		//  (必ず3の倍数になる)
+		std::int32_t vertex_num{};
+	};
 }

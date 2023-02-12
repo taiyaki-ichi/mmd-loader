@@ -7,7 +7,7 @@
 
 namespace mmdl
 {
-	
+
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
 	template<typename T, typename traits = pmx_header_traits<T>>
@@ -200,7 +200,7 @@ namespace mmdl
 			read_from_istream(in, texture_path_buffer, texture_path_size);
 
 			// 文字列を格納
-			traits::emplace_back(result, texture_path_buffer, 
+			traits::emplace_back(result, texture_path_buffer,
 				texture_path_size % 2 == 0 ? texture_path_size / sizeof(char_type) : (texture_path_size + 1) / sizeof(char_type));
 
 			// 初期化しておく
@@ -223,88 +223,66 @@ namespace mmdl
 		// コンテナの大きさ指定し構築
 		auto result = traits::construct(static_cast<std::size_t>(num));
 
-
-		std::int32_t name_size{};
-		char_type name[CharBufferSize]{};
-		std::int32_t english_name_size{};
-		char_type english_name[CharBufferSize]{};
-		std::array<float, 4> diffuse{};
-		std::array<float, 3> specular{};
-		float specularity{};
-		std::array<float, 3> ambient{};
-		std::uint8_t bit_flag{};
-		std::array<float, 4> edge_color{};
-		float edge_size{};
-		std::size_t texture_index{};
-		std::size_t sphere_texture_index{};
-		std::uint8_t sphere_mode{};
-		std::uint8_t toon_flag{};
-		std::size_t toon_index{};
-		std::int32_t memo_size{};
-		char_type memo[CharBufferSize]{};
-		std::int32_t vertex_num{};
+		pmx_material_buffer<char_type, CharBufferSize> buffer{};
 
 		// それぞれのマテリアルの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
 			// 名前
-			read_from_istream(in, &name_size);
-			read_from_istream(in, name, name_size);
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
 
 			// 英語の名前
-			read_from_istream(in, &english_name_size);
-			read_from_istream(in, english_name, english_name_size);
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
 
 			// 色情報
-			read_from_istream(in, &diffuse);
-			read_from_istream(in, &specular);
-			read_from_istream(in, &specularity);
-			read_from_istream(in, &ambient);
+			read_from_istream(in, &buffer.diffuse);
+			read_from_istream(in, &buffer.specular);
+			read_from_istream(in, &buffer.specularity);
+			read_from_istream(in, &buffer.ambient);
 
 			// 描画フラグ
-			read_from_istream(in, &bit_flag);
+			read_from_istream(in, &buffer.bit_flag);
 
 			// エッジ
-			read_from_istream(in, &edge_color);
-			read_from_istream(in, &edge_size);
+			read_from_istream(in, &buffer.edge_color);
+			read_from_istream(in, &buffer.edge_size);
 
 			// テクスチャ
-			read_intanger_from_istream(in, &texture_index, texture_index_size);
-			read_intanger_from_istream(in, &sphere_texture_index, texture_index_size);
+			read_intanger_from_istream(in, &buffer.texture_index, texture_index_size);
+			read_intanger_from_istream(in, &buffer.sphere_texture_index, texture_index_size);
 
 			// スフィアモード
-			read_from_istream(in, &sphere_mode);
+			read_from_istream(in, &buffer.sphere_mode);
 
 			// トゥーン
-			read_from_istream(in, &toon_flag);
+			read_from_istream(in, &buffer.toon_flag);
 
 			// 個別トゥーンの場合
-			if (toon_flag == 0) {
-				read_intanger_from_istream(in, &toon_index, texture_index_size);
+			if (buffer.toon_flag == 0) {
+				read_intanger_from_istream(in, &buffer.toon_index, texture_index_size);
 			}
 			//共有トゥーンの場合
 			else {
-				read_intanger_from_istream(in, &toon_index, 1);
+				read_intanger_from_istream(in, &buffer.toon_index, 1);
 			}
 
 			// メモ
-			read_from_istream(in, &memo_size);
-			read_from_istream(in, memo, memo_size);
+			read_from_istream(in, &buffer.memo_size);
+			read_from_istream(in, &buffer.memo[0], buffer.memo_size);
 
 			// 面の数
-			read_from_istream(in, &vertex_num);
+			read_from_istream(in, &buffer.vertex_num);
 
 			// 要素を追加
-			traits::emplace_back(result, name, name_size % 2 == 0 ? name_size / sizeof(char_type) : (name_size + 1) / sizeof(char_type),
-				english_name, english_name_size % 2 == 0 ? english_name_size / sizeof(char_type) : (english_name_size + 1) / sizeof(char_type),
-				diffuse, specular, specularity, ambient, bit_flag, edge_color, edge_size, texture_index, sphere_texture_index,
-				sphere_mode, toon_flag, toon_index, memo, memo_size, vertex_num);
+			traits::emplace_back(result, buffer);
 
 
 			// 初期化しておく
-			std::fill(std::begin(name), std::end(name), 0);
-			std::fill(std::begin(english_name), std::end(english_name), 0);
-			std::fill(std::begin(memo), std::end(memo), 0);
+			std::fill(std::begin(buffer.name), std::end(buffer.name), 0);
+			std::fill(std::begin(buffer.english_name), std::end(buffer.english_name), 0);
+			std::fill(std::begin(buffer.memo), std::end(buffer.memo), 0);
 		}
 
 		return result;
