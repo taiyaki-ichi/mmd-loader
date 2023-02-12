@@ -109,8 +109,8 @@ namespace mmdl
 	{
 		using char_type = Str::value_type;
 
-		template<typename CharType, std::size_t CharBufferSize>
-		static pmx_info<Str> construct(pmx_info_buffer<CharType, CharBufferSize> const& buffer)
+		template<std::size_t CharBufferSize>
+		static pmx_info<Str> construct(pmx_info_buffer<char_type, CharBufferSize> const& buffer)
 		{
 			return {
 				Str(&buffer.model_name[0],buffer.model_name_size),

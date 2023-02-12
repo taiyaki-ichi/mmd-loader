@@ -17,8 +17,8 @@ namespace mmdl
 	{
 		using char_type = void;
 
-		template<typename CharType, std::size_t CharBufferSize>
-		static T construct(pmx_info_buffer<CharType, CharBufferSize> const&);
+		template<std::size_t CharBufferSize>
+		static T construct(pmx_info_buffer<char_type, CharBufferSize> const&);
 	};
 
 	template<typename T>
@@ -65,8 +65,8 @@ namespace mmdl
 		static T construct(std::size_t size);
 
 		// 要素を追加
-		template<typename CharType, std::size_t CharBufferSize>
-		static void emplace_back(T& material, pmx_material_buffer<CharType, CharBufferSize> const&);
+		template<std::size_t CharBufferSize>
+		static void emplace_back(T& material, pmx_material_buffer<char_type, CharBufferSize> const&);
 	};
 
 	template<typename T>
@@ -81,6 +81,8 @@ namespace mmdl
 		template<std::size_t CharBufferSize, std::size_t IKLinkBufferSize >
 		static void emplace_back(T& bone, pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const&);
 	};
+
+
 
 	// プライマリテンプレート
 	template<typename, typename>
