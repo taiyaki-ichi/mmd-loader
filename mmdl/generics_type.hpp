@@ -78,59 +78,8 @@ namespace mmdl
 		static T construct(std::size_t size);
 
 		// 要素を追加
-		static void emplace_back(T& bone,
-			char_type* name, std::size_t name_size,
-			char_type* english_name, std::size_t english_name_size,
-			std::array<float, 3> const& position,
-			std::size_t parent_bone_index,
-			std::size_t transformation_level,
-			/*
-			○ボーンフラグ
-				0x0001  : 接続先(PMD子ボーン指定)表示方法 -> 0:座標オフセットで指定 1:ボーンで指定
-
-				0x0002  : 回転可能
-				0x0004  : 移動可能
-				0x0008  : 表示
-				0x0010  : 操作可
-
-				0x0020  : IK
-
-				0x0080  : ローカル付与 | 付与対象 0:ユーザー変形値／IKリンク／多重付与 1:親のローカル変形量
-				0x0100  : 回転付与
-				0x0200  : 移動付与
-
-				0x0400  : 軸固定
-				0x0800  : ローカル軸
-
-				0x1000  : 物理後変形
-				0x2000  : 外部親変形
-			*/
-			std::uint16_t bone_flag,
-			// 接続先のビットが0の場合に使用する座標オフセット
-			std::array<float, 3> const& access_point_offset,
-			// 接続先のビットが1の場合に使用する接続先のボーンのインデックス
-			std::size_t access_bone_index,
-			// 回転付与または移動付与のビットが1の場合に使用する付与親のボーンのインデックス
-			std::size_t assign_bone_index,
-			// 回転付与または移動付与のビットが1の場合に使用する付与率
-			std::size_t assign_param,
-			// 軸固定が1のビットが1の場合に使用する軸の方向ベクトル
-			std::array<float, 3> const& fixed_direction,
-			// 外部親変形のビットが1の場合に使用するKey値
-			std::size_t key_value,
-			// 以下、IKのビットが1の場合に使用する
-			// IKターゲットのボーン
-			std::size_t ik_target_bone,
-			// IKのループの回数
-			std::size_t ik_loop_num,
-			// IKの1回あたりの角度制限
-			float ik_angle_limit_par_process,
-			// IKリンクの数
-			std::size_t ik_link_size,
-			// IKリンク
-			// ボーンのインデックス、角度制限の有無、角度制限の下限、角度制限の上限、、、の順
-			std::tuple<std::size_t, std::uint8_t, std::array<float, 3>, std::array<float, 3>>* ik_link
-		);
+		template<std::size_t CharBufferSize, std::size_t IKLinkBufferSize >
+		static void emplace_back(T& bone, pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const&);
 	};
 
 	// プライマリテンプレート

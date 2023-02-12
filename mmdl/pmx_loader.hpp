@@ -302,101 +302,84 @@ namespace mmdl
 		// コンテナの大きさ指定し構築
 		auto result = traits::construct(num);
 
-		std::int32_t name_size{};
-		char_type name[BufferNum]{};
-		std::int32_t english_name_size{};
-		char_type english_name[BufferNum]{};
-		std::array<float, 3> position{};
-		std::size_t parent_bone_index{};
-		std::int32_t transformation_level{};
-		std::uint16_t bone_flag{};
-		std::array<float, 3> access_point_offset{};
-		std::size_t access_bone_index{};
-		std::size_t assign_bone_index{};
-		float assign_rate{};
-		std::array<float, 3> fixed_axis_direction{};
-		std::array<float, 3> local_x_axis_direction{};
-		std::array<float, 3> local_z_axis_direction{};
-		std::int32_t key_value{};
-		std::size_t ik_target_bone{};
-		std::int32_t ik_loop_num{};
-		float ik_angle_limit_par_process{};
-		std::int32_t ik_link_size{};
-		std::tuple<std::size_t, std::uint8_t, std::array<float, 3>, std::array<float, 3>> ik_link[IKLinkBufferNum]{};
-
+		pmx_bone_buffer<char_type, BufferNum, IKLinkBufferNum> buffer{};
 
 		// それぞれのボーンの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
 			// 名前
-			read_from_istream(in, &name_size);
-			read_from_istream(in, name, name_size);
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
+			// 大きさから要素数へ変更
+			buffer.name_size = buffer.name_size % 2 == 0 ? buffer.name_size / sizeof(char_type) : (buffer.name_size + 1) / sizeof(char_type);
 
 			// 英語の名前
-			read_from_istream(in, &english_name_size);
-			read_from_istream(in, english_name, english_name_size);
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
+			// 大きさ可rあ要素数へ変更
+			buffer.english_name_size = buffer.english_name_size % 2 == 0 ? buffer.english_name_size / sizeof(char_type) : (buffer.english_name_size + 1) / sizeof(char_type);
 
 			// 位置
-			read_from_istream(in, &position);
+			read_from_istream(in, &buffer.position);
 
 			// 親ボーン
-			read_from_istream(in, &parent_bone_index, bone_index_size);
+			read_from_istream(in, &buffer.parent_bone_index, bone_index_size);
 
 			// 変形階層
-			read_from_istream(in, &transformation_level);
+			read_from_istream(in, &buffer.transformation_level);
 
 			// ボーンフラグ
-			read_from_istream(in, &bone_flag);
+			read_from_istream(in, &buffer.bone_flag);
 
 			// 接続先
-			if ((bone_flag & 0x0001) == 0)
+			if ((buffer.bone_flag & 0x0001) == 0)
 			{
-				read_from_istream(in, &access_point_offset);
+				read_from_istream(in, &buffer.access_point_offset);
 			}
 			else
 			{
-				read_intanger_from_istream(in, &access_bone_index, bone_index_size);
+				read_intanger_from_istream(in, &buffer.access_bone_index, bone_index_size);
 			}
 
 			// 回転付与または移動付与
-			if ((bone_flag & 0x0100) != 0 || (bone_flag & 0x0200) != 0)
+			if ((buffer.bone_flag & 0x0100) != 0 || (buffer.bone_flag & 0x0200) != 0)
 			{
-				read_intanger_from_istream(in, &assign_bone_index, bone_index_size);
-				read_from_istream(in, &assign_rate);
+				read_intanger_from_istream(in, &buffer.assign_bone_index, bone_index_size);
+				read_from_istream(in, &buffer.assign_rate);
 			}
 
 			// 軸固定
-			if ((bone_flag & 0x0400) != 0)
+			if ((buffer.bone_flag & 0x0400) != 0)
 			{
-				read_from_istream(in, &fixed_axis_direction);
+				read_from_istream(in, &buffer.fixed_axis_direction);
 			}
 
 			// ローカル軸
-			if ((bone_flag & 0x0800) != 0)
+			if ((buffer.bone_flag & 0x0800) != 0)
 			{
-				read_from_istream(in, &local_x_axis_direction);
-				read_from_istream(in, &local_z_axis_direction);
+				read_from_istream(in, &buffer.local_x_axis_direction);
+				read_from_istream(in, &buffer.local_z_axis_direction);
 			}
 
 			// 外部親変形
-			if ((bone_flag & 0x2000) != 0)
+			if ((buffer.bone_flag & 0x2000) != 0)
 			{
-				read_from_istream(in, &key_value);
+				read_from_istream(in, &buffer.key_value);
 			}
 
 			// IK
-			if ((bone_flag & 0x0020) != 0)
+			if ((buffer.bone_flag & 0x0020) != 0)
 			{
-				read_intanger_from_istream(in, &ik_target_bone, bone_index_size);
-				read_from_istream(in, &ik_loop_num);
-				read_from_istream(in, &ik_angle_limit_par_process);
+				read_intanger_from_istream(in, &buffer.ik_target_bone, bone_index_size);
+				read_from_istream(in, &buffer.ik_loop_num);
+				read_from_istream(in, &buffer.ik_angle_limit_par_process);
 
 				// IK数の取得
-				read_from_istream(in, &ik_link_size);
+				read_from_istream(in, &buffer.ik_link_size);
 
-				for (std::size_t j = 0; j < ik_link_size; j++)
+				for (std::size_t j = 0; j < buffer.ik_link_size; j++)
 				{
-					auto& [ik_bone_index, ik_is_angle_limit, ik_angle_limit_bottom, ik_angle_limit_top] = ik_link[j];
+					auto& [ik_bone_index, ik_is_angle_limit, ik_angle_limit_bottom, ik_angle_limit_top] = buffer.ik_link[j];
 
 					read_intanger_from_istream(in, &ik_bone_index, bone_index_size);
 
@@ -415,31 +398,12 @@ namespace mmdl
 			}
 
 			// 要素の追加
-			traits::emplace_back(result,
-				name, name_size % 2 == 0 ? name_size / sizeof(char_type) : (name_size + 1) / sizeof(char_type),
-				english_name, english_name_size % 2 == 0 ? english_name_size / sizeof(char_type) : (english_name_size + 1) / sizeof(char_type),
-				position,
-				parent_bone_index,
-				transformation_level,
-				bone_flag,
-				access_point_offset,
-				access_bone_index,
-				assign_bone_index,
-				assign_rate,
-				fixed_axis_direction,
-				local_x_axis_direction,
-				local_z_axis_direction,
-				key_value,
-				ik_target_bone,
-				ik_loop_num,
-				ik_angle_limit_par_process,
-				ik_link_size,
-				ik_link
-			);
+			traits::emplace_back(result, buffer);
 
-			// 初期化しておく
-			std::fill(std::begin(name), std::end(name), 0);
-			std::fill(std::begin(english_name), std::end(english_name), 0);
+			// 一応、初期化しておく
+			std::fill(std::begin(buffer.name), std::end(buffer.name), 0);
+			std::fill(std::begin(buffer.english_name), std::end(buffer.english_name), 0);
+			buffer.ik_link = {};
 		}
 
 		return result;

@@ -573,48 +573,13 @@ namespace mmdl
 		}
 
 		// 要素を追加
-		static void emplace_back(std::vector<pmx_bone<Str, Vec3, Container, BoneIndex>>& bone,
-			char_type* name, std::size_t name_size,
-			char_type* english_name, std::size_t english_name_size,
-			std::array<float, 3> const& position,
-			std::size_t parent_bone_index,
-			std::size_t transformation_level,
-
-			std::uint16_t bone_flag,
-			// 接続先のビットが0の場合に使用する座標オフセット
-			std::array<float, 3> const& access_point_offset,
-			// 接続先のビットが1の場合に使用する接続先のボーンのインデックス
-			std::size_t access_bone_index,
-			// 回転付与または移動付与のビットが1の場合に使用する付与親のボーンのインデックス
-			std::size_t assign_bone_index,
-			// 回転付与または移動付与のビットが1の場合に使用する付与率
-			float assign_rate,
-			// 軸固定のビットが1の場合に使用する軸の方向ベクトル
-			std::array<float, 3> const& fixed_axis_direction,
-			// ローカル軸のビットが1の場合に使用するX軸の方向ベクトル
-			std::array<float, 3> const& local_x_axis_direction,
-			// ローカル軸のビットが1の場合に使用するZ軸の方向ベクトル
-			std::array<float, 3> const& local_z_axis_direction,
-			// 外部親変形のビットが1の場合に使用するKey値
-			std::size_t key_value,
-			// 以下、IKのビットが1の場合に使用する
-			// IKターゲットのボーン
-			std::size_t ik_target_bone,
-			// IKのループの回数
-			std::size_t ik_loop_num,
-			// IKの1回あたりの角度制限
-			float ik_angle_limit_par_process,
-			// IKリンクの数
-			std::size_t ik_link_size,
-			// IKリンク
-			// ボーンのインデックス、角度制限の有無、角度制限の下限、角度制限の上限、、、の順
-			std::tuple<std::size_t, std::uint8_t, std::array<float, 3>, std::array<float, 3>>* ik_link
-		)
+		template<std::size_t CharBufferSize, std::size_t IKLinkBufferSize>
+		static void emplace_back(std::vector<pmx_bone<Str, Vec3, Container, BoneIndex>>& bone, pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const& buffer)
 		{
-			Container<mmdl::ik_link<Vec3, BoneIndex>> il(ik_link_size);
-			for (std::size_t i = 0; i < ik_link_size; i++)
+			Container<mmdl::ik_link<Vec3, BoneIndex>> il(buffer.ik_link_size);
+			for (std::size_t i = 0; i < buffer.ik_link_size; i++)
 			{
-				auto const& [bone_index, is_limit, bottom, top] = ik_link[i];
+				auto const& [bone_index, is_limit, bottom, top] = buffer.ik_link[i];
 				il[i].bone = static_cast<BoneIndex>(bone_index);
 				if (is_limit == 1) {
 					il[i].min_max_angle_limit = std::make_pair(Vec3{ bottom[0],bottom[1] ,bottom[2] }, Vec3{ top[0],top[1] ,top[2] });
@@ -623,23 +588,23 @@ namespace mmdl
 			}
 
 			pmx_bone<Str, Vec3, Container, BoneIndex> b{
-				Str(name,name_size),
-				Str(english_name,english_name_size),
-				{position[0],position[1],position[2]},
-				static_cast<BoneIndex>(parent_bone_index),
-				static_cast<std::int32_t>(transformation_level),
-				std::bitset<16>{bone_flag},
-				{access_point_offset[0],access_point_offset[1],access_point_offset[2]},
-				static_cast<BoneIndex>(access_bone_index),
-				static_cast<BoneIndex>(assign_bone_index),
-				assign_rate,
-				{fixed_axis_direction[0],fixed_axis_direction[1],fixed_axis_direction[2]},
-				{local_x_axis_direction[0],local_x_axis_direction[1],local_x_axis_direction[2]},
-				{local_z_axis_direction[0],local_z_axis_direction[1],local_z_axis_direction[2]},
-				static_cast<std::size_t>(key_value),
-				static_cast<BoneIndex>(ik_target_bone),
-				static_cast<std::int32_t>(ik_loop_num),
-				ik_angle_limit_par_process,
+				Str(&buffer.name[0],buffer.name_size),
+				Str(&buffer.english_name[0],buffer.english_name_size),
+				{buffer.position[0],buffer.position[1],buffer.position[2]},
+				static_cast<BoneIndex>(buffer.parent_bone_index),
+				static_cast<std::int32_t>(buffer.transformation_level),
+				std::bitset<16>{buffer.bone_flag},
+				{buffer.access_point_offset[0],buffer.access_point_offset[1],buffer.access_point_offset[2]},
+				static_cast<BoneIndex>(buffer.access_bone_index),
+				static_cast<BoneIndex>(buffer.assign_bone_index),
+				buffer.assign_rate,
+				{buffer.fixed_axis_direction[0],buffer.fixed_axis_direction[1],buffer.fixed_axis_direction[2]},
+				{buffer.local_x_axis_direction[0],buffer.local_x_axis_direction[1],buffer.local_x_axis_direction[2]},
+				{buffer.local_z_axis_direction[0],buffer.local_z_axis_direction[1],buffer.local_z_axis_direction[2]},
+				static_cast<std::size_t>(buffer.key_value),
+				static_cast<BoneIndex>(buffer.ik_target_bone),
+				static_cast<std::int32_t>(buffer.ik_loop_num),
+				buffer.ik_angle_limit_par_process,
 				std::move(il)
 			};
 
