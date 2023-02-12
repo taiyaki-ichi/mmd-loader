@@ -3,48 +3,41 @@
 #include"utility.hpp"
 #include"generics_type.hpp"
 #include<concepts>
+#include"pmx_buffer.hpp"
 
 namespace mmdl
 {
+	
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
 	template<typename T, typename traits = pmx_header_traits<T>>
 	T load_header(std::istream& in)
 	{
+		pmx_header_buffer buffer{};
+
 		// 最初の4文字はいらない「Pmx 」の文字
 		in.seekg(4);
 
-		float version;
-		read_from_istream(in, &version);
+		read_from_istream(in, &buffer.version);
 
 		// 以降のデータの大きさの読み込み
+		// 「PMX2.0は 8 で固定」つまり、bit単位?
 		std::uint8_t size;
 		read_from_istream(in, &size);
 		// bitからbyteへ変換
-		// WARNING: ここだけbitっぽい?
 		size /= 8;
 
-		std::uint8_t encode;
-		read_intanger_from_istream(in, &encode, size);
-		std::size_t add_uv_number;
-		read_intanger_from_istream(in, &add_uv_number, size);
+		read_intanger_from_istream(in, &buffer.encode, size);
+		read_intanger_from_istream(in, &buffer.additional_uv_num, size);
 
-		std::size_t vertex_index_size;
-		read_intanger_from_istream(in, &vertex_index_size, size);
-		std::size_t texture_index_size;
-		read_intanger_from_istream(in, &texture_index_size, size);
-		std::size_t material_index_size;
-		read_intanger_from_istream(in, &material_index_size, size);
-		std::size_t bone_index_size;
-		read_intanger_from_istream(in, &bone_index_size, size);
-		std::size_t morph_index_size;
-		read_intanger_from_istream(in, &morph_index_size, size);
-		std::size_t rigid_body_index_size;
-		read_intanger_from_istream(in, &rigid_body_index_size, size);
+		read_intanger_from_istream(in, &buffer.vertex_index_size, size);
+		read_intanger_from_istream(in, &buffer.texture_index_size, size);
+		read_intanger_from_istream(in, &buffer.material_index_size, size);
+		read_intanger_from_istream(in, &buffer.bone_index_size, size);
+		read_intanger_from_istream(in, &buffer.morph_index_size, size);
+		read_intanger_from_istream(in, &buffer.rigid_body_index_size, size);
 
-		return traits::construct(
-			version, encode, add_uv_number, vertex_index_size, texture_index_size, material_index_size, bone_index_size, morph_index_size, rigid_body_index_size
-		);
+		return traits::construct(buffer);
 	}
 
 	template<typename T, typename traits = pmx_info_traits<T>, std::size_t BufferSize = 512>
