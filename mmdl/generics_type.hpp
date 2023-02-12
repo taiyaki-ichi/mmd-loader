@@ -52,7 +52,8 @@ namespace mmdl
 		static T construct(std::size_t size);
 
 		// —v‘f‚ð’Ç‰Á
-		static void emplace_back(T& texture_path, char_type const* str, std::size_t size);
+		template<std::size_t CharBufferSize>
+		static void emplace_back(T& texture_path, std::array<char_type, CharBufferSize> const& str, std::size_t size);
 	};
 
 	template<typename T>

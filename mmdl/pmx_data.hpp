@@ -283,9 +283,10 @@ namespace mmdl
 		}
 
 		// —v‘f‚ð’Ç‰Á
-		static void emplace_back(std::vector<std::wstring>& texture_path, char_type const* str, std::size_t size)
+		template<std::size_t CharBufferSize>
+		static void emplace_back(std::vector<std::wstring>& texture_path, std::array<char_type, CharBufferSize> const& str, std::size_t size)
 		{
-			texture_path.emplace_back(str, size);
+			texture_path.emplace_back(&str[0], size);
 		}
 	};
 

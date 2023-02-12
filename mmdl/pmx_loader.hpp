@@ -188,7 +188,7 @@ namespace mmdl
 		auto result = traits::construct(static_cast<std::size_t>(num));
 
 		std::int32_t texture_path_size{};
-		char_type texture_path_buffer[CharBufferSize]{};
+		std::array<char_type, CharBufferSize> texture_path_buffer{};
 
 		// 1•¶š—ñ‚²‚Æ‚Éæ“¾‚µ‚Ä‚¢‚­
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -197,7 +197,7 @@ namespace mmdl
 			read_from_istream(in, &texture_path_size);
 
 			// •¶š—ñ‚Ì“Ç‚İ‚İ
-			read_from_istream(in, texture_path_buffer, texture_path_size);
+			read_from_istream(in, &texture_path_buffer[0], texture_path_size);
 
 			// •¶š—ñ‚ğŠi”[
 			traits::emplace_back(result, texture_path_buffer,
