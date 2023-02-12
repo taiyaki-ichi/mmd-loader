@@ -171,176 +171,70 @@ namespace mmdl
 			return result;
 		}
 
-		// BDEF1形式のボーンの追加
-		static void emplace_back_BDEF1(
-			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ウェイト1.0の単一ボーン
-			std::size_t bone_index_1,
-			// エッジ倍率
-			float edge_factor
-		)
+		static void emplace_back(std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex, pmx_vertex_buffer const& buffer, std::uint8_t additional_uv_num)
 		{
 			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
 
-			v.position = { position[0],position[1] ,position[2] };
-			v.normal = { normal[0],normal[1] ,normal[2] };
-			v.uv = { uv[0],uv[1] };
+			v.position = { buffer.position[0],buffer.position[1] ,buffer.position[2] };
+			v.normal = { buffer.normal[0],buffer.normal[1] ,buffer.normal[2] };
+			v.uv = { buffer.uv[0],buffer.uv[1] };
 
-			for (std::size_t i = 0; i < add_uv_size; i++)
+			for (std::size_t i = 0; i < additional_uv_num; i++)
 			{
-				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
+				v.additional_uv[i] = { buffer.additional_uv[i][0],buffer.additional_uv[i][1] ,buffer.additional_uv[i][2] ,buffer.additional_uv[i][3] };
 			}
 
-			v.bone[0] = bone_index_1;
-			v.weight[0] = 1.f;
+			auto weight_sum = buffer.bone_weight[0] + buffer.bone_weight[1] + buffer.bone_weight[2] + buffer.bone_weight[3];
 
-			v.edge_magnification = edge_factor;
-
-			vertex.emplace_back(std::move(v));
-		}
-
-		// BDEF2形式のボーンの追加
-		static void emplace_back_BDEF2(
-			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ボーン1のインデックス
-			std::size_t bone_index_1,
-			// ボーン2のインデックス
-			std::size_t bone_index_2,
-			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
-			float bone_weight_1,
-			// エッジ倍率
-			float edge_factor
-		)
-		{
-			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
-
-			v.position = { position[0],position[1] ,position[2] };
-			v.normal = { normal[0],normal[1] ,normal[2] };
-			v.uv = { uv[0],uv[1] };
-
-			for (std::size_t i = 0; i < add_uv_size; i++)
+			switch (buffer.weight_type)
 			{
-				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
+				// BDEF1
+			case 0:
+				v.bone[0] = buffer.bone_index[0];
+				v.weight[0] = 1.f;
+
+				break;
+
+				// BDEF2
+			case 1:
+				v.bone[0] = buffer.bone_index[0];
+				v.bone[1] = buffer.bone_index[1];
+				v.weight[0] = buffer.bone_weight[0];
+				v.weight[1] = 1.f - buffer.bone_weight[0];
+
+				break;
+
+				// BDEF4
+			case 2:
+				v.bone[0] = buffer.bone_index[0];
+				v.bone[1] = buffer.bone_index[1];
+				v.bone[2] = buffer.bone_index[2];
+				v.bone[3] = buffer.bone_index[3];
+				v.weight[0] = buffer.bone_weight[0] / weight_sum;
+				v.weight[1] = buffer.bone_weight[1] / weight_sum;
+				v.weight[2] = buffer.bone_weight[2] / weight_sum;
+				v.weight[3] = buffer.bone_weight[3] / weight_sum;
+
+				break;
+
+				// SDEF
+			case 3:
+				v.bone[0] = buffer.bone_index[0];
+				v.bone[1] = buffer.bone_index[1];
+				v.weight[0] = buffer.bone_weight[0];
+				v.weight[1] = 1.f - buffer.bone_weight[0];
+
+				std::array<Vec3, 3> sdef{ {
+					{buffer.sdef_c[0],buffer.sdef_c[1],buffer.sdef_c[2]},
+					{buffer.sdef_r0[0],buffer.sdef_r0[1],buffer.sdef_r0[2]},
+					{buffer.sdef_r1[0],buffer.sdef_r1[1],buffer.sdef_r1[2]}
+				} };
+				v.sdef = sdef;
+
+				break;
 			}
 
-			v.bone[0] = bone_index_1;
-			v.bone[1] = bone_index_2;
-			v.weight[0] = bone_weight_1;
-			v.weight[1] = 1.f - bone_weight_1;
-
-			v.edge_magnification = edge_factor;
-
-			vertex.emplace_back(std::move(v));
-		}
-
-		// BDEF4形式のボーンの追加
-		static void emplace_back_BDEF4(
-			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ボーン1のインデックス
-			std::size_t bone_index_1,
-			// ボーン2のインデックス
-			std::size_t bone_index_2,
-			// ボーン3のインデックス
-			std::size_t bone_index_3,
-			// ボーン4のインデックス
-			std::size_t bone_index_4,
-			// ボーン1のウェイト
-			float bone_weight_1,
-			// ボーン2のウェイト
-			float bone_weight_2,
-			// ボーン3のウェイト
-			float bone_weight_3,
-			// ボーン4のウェイト（ウェイトの合計について1の保証はない）
-			float bone_weight_4,
-			// エッジ倍率
-			float edge_factor
-		)
-		{
-			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
-
-			v.position = { position[0],position[1] ,position[2] };
-			v.normal = { normal[0],normal[1] ,normal[2] };
-			v.uv = { uv[0],uv[1] };
-
-			for (std::size_t i = 0; i < add_uv_size; i++)
-			{
-				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
-			}
-
-			v.bone[0] = bone_index_1;
-			v.bone[1] = bone_index_2;
-			v.bone[2] = bone_index_3;
-			v.bone[3] = bone_index_4;
-			auto weight_sum = bone_weight_1 + bone_index_2 + bone_index_3 + bone_index_4;
-			v.weight[0] = bone_weight_1 / weight_sum;
-			v.weight[1] = bone_weight_2 / weight_sum;
-			v.weight[2] = bone_weight_3 / weight_sum;
-			v.weight[3] = bone_weight_4 / weight_sum;
-
-			v.edge_magnification = edge_factor;
-
-			vertex.emplace_back(std::move(v));
-		}
-
-		// SDEF形式のボーンの追加
-		static void emplace_back_SDEF(
-			std::vector<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ボーン1のインデックス
-			std::size_t bone_index_1,
-			// ボーン2のインデックス
-			std::size_t bone_index_2,
-			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
-			float bone_weight_1,
-			// SDEF-C値(x,y,z)
-			std::array<float, 3> const& sdef_c,
-			// SDEF-R0値(x,y,z)
-			std::array<float, 3> const& sdef_r0,
-			// SDEF-R1値(x,y,z) ※修正値を要計算
-			std::array<float, 3> const& sdef_r1,
-			// エッジ倍率
-			float edge_factor
-		)
-		{
-			pmx_vertex<Vec2, Vec3, Vec4, BoneIndex> v{};
-
-			v.position = { position[0],position[1] ,position[2] };
-			v.normal = { normal[0],normal[1] ,normal[2] };
-			v.uv = { uv[0],uv[1] };
-
-			for (std::size_t i = 0; i < add_uv_size; i++)
-			{
-				v.additional_uv[i] = { add_uv[i][0],add_uv[i][1] ,add_uv[i][2] ,add_uv[i][3] };
-			}
-
-			v.bone[0] = bone_index_1;
-			v.bone[1] = bone_index_2;
-			v.weight[0] = bone_weight_1;
-			v.weight[1] = 1.f - bone_weight_1;
-
-			std::array<Vec3, 3> sdef{ {
-				{sdef_c[0],sdef_c[1],sdef_c[2]},
-				{sdef_r0[0],sdef_r0[1],sdef_r0[2]},
-				{sdef_r1[0],sdef_r1[1],sdef_r1[2]}
-			} };
-			v.sdef = sdef;
-
-			v.edge_magnification = edge_factor;
+			v.edge_magnification = buffer.edge_factor;
 
 			vertex.emplace_back(std::move(v));
 		}

@@ -77,91 +77,71 @@ namespace mmdl
 
 		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		std::array<float, 3> position{};
-		std::array<float, 3> normal{};
-		std::array<float, 2> uv{};
-		std::array<std::array<float, 4>, 4> additional_uv{};
-		std::size_t bone_index_1{}, bone_index_2{}, bone_index_3{}, bone_index_4{};
-		float bone_weight_1{}, bone_weight_2{}, bone_weight_3{}, bone_weight_4{};
-		std::array<float, 3> sdef_c{};
-		std::array<float, 3> sdef_r0{};
-		std::array<float, 3> sdef_r1{};
-		float edge_factor{};
+		pmx_vertex_buffer buffer{};
 
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			read_from_istream(in, &position);
-			read_from_istream(in, &normal);
-			read_from_istream(in, &uv);
+			read_from_istream(in, &buffer.position);
+			read_from_istream(in, &buffer.normal);
+			read_from_istream(in, &buffer.uv);
 
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				read_from_istream(in, &additional_uv[i]);
+				read_from_istream(in, &buffer.additional_uv[i]);
 			}
 
 			// ウェイト変形方式の取得
-			std::uint8_t weight_type;
-			read_from_istream(in, &weight_type);
+			read_from_istream(in, &buffer.weight_type);
 
-			switch (weight_type)
+			switch (buffer.weight_type)
 			{
 				// BDEF1の場合
 			case 0:
-				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
 
-				read_from_istream(in, &edge_factor);
-				traits::emplace_back_BDEF1(result, position, normal, uv, &additional_uv[0], add_uv_number,
-					bone_index_1, edge_factor);
 				break;
 
 				// BDEF2の場合
 			case 1:
-				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
-				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
-				read_from_istream(in, &bone_weight_1);
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[1], bone_index_size);
+				read_from_istream(in, &buffer.bone_weight[0]);
 
-				read_from_istream(in, &edge_factor);
-				traits::emplace_back_BDEF2(result, position, normal, uv, &additional_uv[0], add_uv_number,
-					bone_index_1, bone_index_2, bone_weight_1, edge_factor);
 				break;
 
 				// BDEF4の場合
 			case 2:
-				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
-				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
-				read_intanger_from_istream(in, &bone_index_3, bone_index_size);
-				read_intanger_from_istream(in, &bone_index_4, bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[1], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[2], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[3], bone_index_size);
 
-				read_from_istream(in, &bone_weight_1);
-				read_from_istream(in, &bone_weight_2);
-				read_from_istream(in, &bone_weight_3);
-				read_from_istream(in, &bone_weight_4);
+				read_from_istream(in, &buffer.bone_weight[0]);
+				read_from_istream(in, &buffer.bone_weight[1]);
+				read_from_istream(in, &buffer.bone_weight[2]);
+				read_from_istream(in, &buffer.bone_weight[3]);
 
-				read_from_istream(in, &edge_factor);
-				traits::emplace_back_BDEF4(result, position, normal, uv, &additional_uv[0], add_uv_number,
-					bone_index_1, bone_index_2, bone_index_3, bone_index_4, bone_weight_1, bone_weight_2, bone_weight_3, bone_weight_4, edge_factor);
 				break;
 
 				// SDEFの倍
 			case 3:
-				read_intanger_from_istream(in, &bone_index_1, bone_index_size);
-				read_intanger_from_istream(in, &bone_index_2, bone_index_size);
-				read_from_istream(in, &bone_weight_1);
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[1], bone_index_size);
+				read_from_istream(in, &buffer.bone_weight[0]);
 				// ここまでBDEF2と同じ
 
-
-				read_from_istream(in, &sdef_c);
-				read_from_istream(in, &sdef_r0);
-				read_from_istream(in, &sdef_r1);
-
-				read_from_istream(in, &edge_factor);
-				traits::emplace_back_SDEF(result, position, normal, uv, &additional_uv[0], add_uv_number,
-					bone_index_1, bone_index_2, bone_weight_1, sdef_c, sdef_r0, sdef_r1, edge_factor);
+				read_from_istream(in, &buffer.sdef_c);
+				read_from_istream(in, &buffer.sdef_r0);
+				read_from_istream(in, &buffer.sdef_r1);
 
 				break;
 			}
+
+			read_from_istream(in, &buffer.edge_factor);
+
+			traits::emplace_back(result, buffer, add_uv_number);
 		}
 
 		return result;

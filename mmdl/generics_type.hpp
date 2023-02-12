@@ -27,86 +27,8 @@ namespace mmdl
 		// サイズを指定して構築
 		static T construct(std::size_t size);
 
-		// BDEF1形式のボーンの追加
-		static void emplace_back_BDEF1(
-			T& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ウェイト1.0の単一ボーン
-			std::size_t bone_index_1,
-			// エッジ倍率
-			float edge_factor
-		);
-
-		// BDEF2形式のボーンの追加
-		static void emplace_back_BDEF2(
-			T& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ボーン1のインデックス
-			std::size_t bone_index_1,
-			// ボーン2のインデックス
-			std::size_t bone_index_2,
-			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
-			float bone_weight_1,
-			// エッジ倍率
-			float edge_factor
-		);
-
-		// BDEF4形式のボーンの追加
-		static void emplace_back_BDEF4(
-			T& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ボーン1のインデックス
-			std::size_t bone_index_1,
-			// ボーン2のインデックス
-			std::size_t bone_index_2,
-			// ボーン3のインデックス
-			std::size_t bone_index_3,
-			// ボーン4のインデックス
-			std::size_t bone_index_4,
-			// ボーン1のウェイト
-			float bone_weight_1,
-			// ボーン2のウェイト
-			float bone_weight_2,
-			// ボーン3のウェイト
-			float bone_weight_3,
-			// ボーン4のウェイト（ウェイトの合計について1の保証はない）
-			float bone_weight_4,
-			// エッジ倍率
-			float edge_factor
-		);
-
-		// SDEF形式のボーンの追加
-		static void emplace_back_SDEF(
-			T& vertex,
-			std::array<float, 3> const& position,
-			std::array<float, 3> const& normal,
-			std::array<float, 2> const& uv,
-			std::array<float, 4>* add_uv, std::size_t add_uv_size,
-			// ボーン1のインデックス
-			std::size_t bone_index_1,
-			// ボーン2のインデックス
-			std::size_t bone_index_2,
-			// ボーン1のウェイト(ボーン2のウェイトは 1.0 - ボーン1のウェイト )
-			float bone_weight_1,
-			// SDEF-C値(x,y,z)
-			std::array<float, 3> const& sdef_c,
-			// SDEF-R0値(x,y,z)
-			std::array<float, 3> const& sdef_r0,
-			// SDEF-R1値(x,y,z) ※修正値を要計算
-			std::array<float, 3> const& sdef_r1,
-			// エッジ倍率
-			float edge_factor
-		);
-
+		// 要素を末尾に追加
+		static void emplace_back(T& vertex, pmx_vertex_buffer const&);
 	};
 
 

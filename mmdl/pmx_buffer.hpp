@@ -59,4 +59,42 @@ namespace mmdl
 		std::int32_t english_comment_size{};
 		std::array<CharType, CharBufferSize> english_comment{};
 	};
+
+
+	struct pmx_vertex_buffer
+	{
+		// 位置
+		std::array<float, 3> position{};
+
+		// 法線
+		std::array<float, 3> normal{};
+
+		// UV
+		std::array<float, 2> uv{};
+
+		// 追加UV
+		std::array<std::array<float, 4>, 4> additional_uv{};
+
+		// ウェイト変形形式
+		// 0:BDEF1 1:BDEF2 2:BDEF4 3:SDEF
+		std::uint8_t weight_type{};
+
+		// ボーンのインデックス
+		std::array<std::size_t, 4> bone_index{};
+
+		// ボーンのウェイト
+		std::array<float, 4> bone_weight{};
+
+		// SDEF-C値
+		std::array<float, 3> sdef_c{};
+
+		// SDEF-R0値
+		std::array<float, 3> sdef_r0{};
+
+		// SDEF-R1値
+		std::array<float, 3> sdef_r1{};
+
+		// エッジ倍率
+		float edge_factor{};
+	};
 }
