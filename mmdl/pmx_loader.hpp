@@ -40,46 +40,30 @@ namespace mmdl
 		return traits::construct(buffer);
 	}
 
-	template<typename T, typename traits = pmx_info_traits<T>, std::size_t BufferSize = 512>
+	template<typename T, typename traits = pmx_info_traits<T>, std::size_t CharBufferSize = 512>
 	T load_info(std::istream& in)
 	{
 		using char_type = typename traits::char_type;
 
-		std::int32_t model_name_size{};
-		char_type model_name_buffer[BufferSize]{};
-
-		std::int32_t english_model_name_size{};
-		char_type english_model_name_buffer[BufferSize]{};
-
-		std::int32_t comment_size{};
-		char_type comment_buffer[BufferSize]{};
-
-		std::int32_t english_comment_size{};
-		char_type english_comment_name_buffer[BufferSize]{};
-
+		pmx_info_buffer<char_type, CharBufferSize> buffer{};
 
 		// モデル名の取得
-		read_from_istream(in, &model_name_size);
-		read_from_istream(in, model_name_buffer, model_name_size);
+		read_from_istream(in, &buffer.model_name_size);
+		read_from_istream(in, &buffer.model_name[0], buffer.model_name_size);
 
 		// モデルの英語名の取得
-		read_from_istream(in, &english_model_name_size);
-		read_from_istream(in, english_model_name_buffer, english_model_name_size);
+		read_from_istream(in, &buffer.english_model_name_size);
+		read_from_istream(in, &buffer.english_model_name[0], buffer.english_model_name_size);
 
 		// コメントの取得
-		read_from_istream(in, &comment_size);
-		read_from_istream(in, comment_buffer, comment_size);
+		read_from_istream(in, &buffer.comment_size);
+		read_from_istream(in, &buffer.comment[0], buffer.comment_size);
 
 		// 英語のコメントの取得
-		read_from_istream(in, &english_comment_size);
-		read_from_istream(in, english_comment_name_buffer, english_comment_size);
+		read_from_istream(in, &buffer.english_comment_size);
+		read_from_istream(in, &buffer.english_comment[0], buffer.english_comment_size);
 
-		return traits::construct(
-			model_name_buffer, static_cast<std::size_t>(model_name_size),
-			english_model_name_buffer, static_cast<std::size_t>(english_model_name_size),
-			comment_buffer, static_cast<std::size_t>(comment_size),
-			english_comment_name_buffer, static_cast<std::size_t>(english_comment_size)
-		);
+		return traits::construct(buffer);
 	}
 
 
@@ -206,7 +190,7 @@ namespace mmdl
 	}
 
 	// テクスチャパスの読み込み
-	template<typename T, typename traits = pmx_texture_path_traits<T>, std::size_t BufferSize = 64>
+	template<typename T, typename traits = pmx_texture_path_traits<T>, std::size_t CharBufferSize = 64>
 	T load_texture_path(std::istream& in)
 	{
 		using char_type = traits::char_type;
@@ -217,7 +201,7 @@ namespace mmdl
 		auto result = traits::construct(static_cast<std::size_t>(num));
 
 		std::int32_t texture_path_size{};
-		char_type texture_path_buffer[BufferSize]{};
+		char_type texture_path_buffer[CharBufferSize]{};
 
 		// 1文字列ごとに取得していく
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -240,7 +224,7 @@ namespace mmdl
 	}
 
 	// マテリアルの読み込み
-	template<typename T, typename traits = pmx_material_traits<T>, std::size_t BufferSize = 64>
+	template<typename T, typename traits = pmx_material_traits<T>, std::size_t CharBufferSize = 64>
 	T load_material(std::istream& in, std::size_t texture_index_size)
 	{
 		using char_type = traits::char_type;
@@ -254,9 +238,9 @@ namespace mmdl
 
 
 		std::int32_t name_size{};
-		char_type name[BufferSize]{};
+		char_type name[CharBufferSize]{};
 		std::int32_t english_name_size{};
-		char_type english_name[BufferSize]{};
+		char_type english_name[CharBufferSize]{};
 		std::array<float, 4> diffuse{};
 		std::array<float, 3> specular{};
 		float specularity{};
@@ -270,7 +254,7 @@ namespace mmdl
 		std::uint8_t toon_flag{};
 		std::size_t toon_index{};
 		std::int32_t memo_size{};
-		char_type memo[BufferSize]{};
+		char_type memo[CharBufferSize]{};
 		std::int32_t vertex_num{};
 
 		// それぞれのマテリアルの読み込み

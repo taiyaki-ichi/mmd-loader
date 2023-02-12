@@ -109,18 +109,14 @@ namespace mmdl
 	{
 		using char_type = Str::value_type;
 
-		static pmx_info<Str> construct(
-			char_type* model_name_str, std::size_t mode_name_str_size,
-			char_type* english_model_name_str, std::size_t english_mode_name_str_size,
-			char_type* comment_str, std::size_t comment_str_size,
-			char_type* english_comment_str, std::size_t english_comment_str_size
-		)
+		template<typename CharType, std::size_t CharBufferSize>
+		static pmx_info<Str> construct(pmx_info_buffer<CharType, CharBufferSize> const& buffer)
 		{
 			return {
-				Str(model_name_str,mode_name_str_size),
-				Str(english_model_name_str,english_mode_name_str_size),
-				Str(comment_str,comment_str_size),
-				Str(english_comment_str,english_comment_str_size)
+				Str(&buffer.model_name[0],buffer.model_name_size),
+				Str(&buffer.english_model_name[0],buffer.english_model_name_size),
+				Str(&buffer.comment[0],buffer.comment_size),
+				Str(&buffer.english_comment[0],buffer.english_comment_size)
 			};
 		}
 	};

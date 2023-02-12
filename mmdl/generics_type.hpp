@@ -17,16 +17,8 @@ namespace mmdl
 	{
 		using char_type = void;
 
-		static T construct(
-			// モデル名
-			char_type* model_name_str, std::size_t mode_name_str_size,
-			// モデル英名
-			char_type* english_model_name_str, std::size_t english_mode_name_str_size,
-			// コメント
-			char_type* comment_str, std::size_t comment_str_size,
-			// コメント英
-			char_type* english_comment_str, std::size_t english_comment_str_size
-			);
+		template<typename CharType, std::size_t CharBufferSize>
+		static T construct(pmx_info_buffer<CharType, CharBufferSize> const&);
 	};
 
 	template<typename T>
@@ -38,7 +30,7 @@ namespace mmdl
 		// BDEF1形式のボーンの追加
 		static void emplace_back_BDEF1(
 			T& vertex,
-			std::array<float,3> const& position,
+			std::array<float, 3> const& position,
 			std::array<float, 3> const& normal,
 			std::array<float, 2> const& uv,
 			std::array<float, 4>* add_uv, std::size_t add_uv_size,
@@ -187,8 +179,8 @@ namespace mmdl
 		// 要素を追加
 		static void emplace_back(T& bone,
 			char_type* name, std::size_t name_size,
-			char_type* english_name,std::size_t english_name_size,
-			std::array<float,3> const& position,
+			char_type* english_name, std::size_t english_name_size,
+			std::array<float, 3> const& position,
 			std::size_t parent_bone_index,
 			std::size_t transformation_level,
 			/*
@@ -214,7 +206,7 @@ namespace mmdl
 			*/
 			std::uint16_t bone_flag,
 			// 接続先のビットが0の場合に使用する座標オフセット
-			std::array<float,3> const& access_point_offset,
+			std::array<float, 3> const& access_point_offset,
 			// 接続先のビットが1の場合に使用する接続先のボーンのインデックス
 			std::size_t access_bone_index,
 			// 回転付与または移動付与のビットが1の場合に使用する付与親のボーンのインデックス
@@ -222,7 +214,7 @@ namespace mmdl
 			// 回転付与または移動付与のビットが1の場合に使用する付与率
 			std::size_t assign_param,
 			// 軸固定が1のビットが1の場合に使用する軸の方向ベクトル
-			std::array<float,3> const& fixed_direction,
+			std::array<float, 3> const& fixed_direction,
 			// 外部親変形のビットが1の場合に使用するKey値
 			std::size_t key_value,
 			// 以下、IKのビットが1の場合に使用する
@@ -236,8 +228,8 @@ namespace mmdl
 			std::size_t ik_link_size,
 			// IKリンク
 			// ボーンのインデックス、角度制限の有無、角度制限の下限、角度制限の上限、、、の順
-			std::tuple<std::size_t,std::uint8_t,std::array<float,3>,std::array<float,3>>* ik_link
-			);
+			std::tuple<std::size_t, std::uint8_t, std::array<float, 3>, std::array<float, 3>>* ik_link
+		);
 	};
 
 	// プライマリテンプレート
