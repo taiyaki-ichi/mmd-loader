@@ -1,53 +1,57 @@
 #pragma once
-#include"vmd_data.hpp"
 #include"utility.hpp"
 #include<istream>
+#include"vmd_loader_traits.hpp"
 
 namespace mmdl
 {
-	inline vmd_header load_vmd_header(std::istream& in)
+	template<typename T, typename traits = vmd_header_traits<T>>
+	T load_vmd_header(std::istream& in)
 	{
-		vmd_header result;
+		vmd_header_buffer buffer{};
 
 		// マジックナンバー
 		char magic[30];
 		in.read(magic, sizeof(magic));
 
 		// 名前
-		in.read(result.name, sizeof(result.name));
+		read_from_istream(in, &buffer.name);
 
 		// フレームデータ数
-		read_from_istream(in, &result.frame_data_num);
+		read_from_istream(in, &buffer.frame_data_num);
 
-		return result;
+		return traits::construct(buffer);
 	}
 
-	template<template<typename>typename Container,typename Vec3,typename Vec4>
-	inline Container<vmd_frame_data<Vec3, Vec4>> load_vmd_frame_data(std::istream& in,auto size)
+	template<typename T, typename traits = vmd_frame_data_traits<T>>
+	T load_vmd_frame_data(std::istream& in, std::size_t size)
 	{
-		Container<vmd_frame_data<Vec3, Vec4>> result(size);
+		auto result = traits::construct(size);
 
-		for (std::size_t i = 0; i < static_cast<std::size_t>(size); i++)
+		vmd_frame_data_buffer buffer{};
+
+		for (std::size_t i = 0; i < size; i++)
 		{
-			auto& frame_data = result[i];
 
 			// ボーン名
-			in.read(frame_data.name, sizeof(frame_data.name));
+			read_from_istream(in, &buffer.name);
 
 			// フレーム番号
-			read_from_istream(in, &frame_data.frame_num);
+			read_from_istream(in, &buffer.frame_num);
 
 			// 移動量
-			read_vec3_from_istream(in, &frame_data.transform);
+			read_from_istream(in, &buffer.transform);
 
 			// クオータニオン
-			read_vec4_from_istream(in, &frame_data.quaternion);
+			read_from_istream(in, &buffer.quaternion);
 
 			// 補完パラメータ
-			in.read(frame_data.complement_parameter, sizeof(frame_data.complement_parameter));
+			read_from_istream(in, &buffer.complement_parameter);
+
+			// 要素を追加
+			traits::emplace_back(result, buffer);
 		}
 
 		return result;
-
 	}
 }
