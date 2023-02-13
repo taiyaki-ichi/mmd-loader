@@ -1,319 +1,285 @@
 #pragma once
-#include"pmx_data.hpp"
+#include"pmx_buffer.hpp"
+#include"pmx_loader_traits.hpp"
 #include"utility.hpp"
-#include"generics_type.hpp"
-#include<concepts>
 
 namespace mmdl
 {
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
-	template<std::integral HeaderDataType = std::uint8_t>
-	pmx_header<HeaderDataType> load_header(std::istream& in)
+	template<typename T, typename traits = pmx_header_traits<T>>
+	T load_header(std::istream& in)
 	{
-		pmx_header<HeaderDataType> result;
+		pmx_header_buffer buffer{};
 
 		// 最初の4文字はいらない「Pmx 」の文字
 		in.seekg(4);
 
-		read_from_istream(in, &result.version);
+		read_from_istream(in, &buffer.version);
 
 		// 以降のデータの大きさの読み込み
+		// 「PMX2.0は 8 で固定」つまり、bit単位?
 		std::uint8_t size;
 		read_from_istream(in, &size);
 		// bitからbyteへ変換
-		// WARNING: ここだけbitっぽい?
 		size /= 8;
 
-		HeaderDataType encode;
-		read_intanger_from_istream<HeaderDataType>(in, &encode, size);
-		result.encode = encode == 0 ? encode_type::utf16 : encode_type::utf8;
-		read_intanger_from_istream(in, &result.add_uv_number, size);
+		read_intanger_from_istream(in, &buffer.encode, size);
+		read_intanger_from_istream(in, &buffer.additional_uv_num, size);
 
-		read_intanger_from_istream(in, &result.vertex_index_size, size);
-		read_intanger_from_istream(in, &result.texture_index_size, size);
-		read_intanger_from_istream(in, &result.material_index_size, size);
-		read_intanger_from_istream(in, &result.bone_index_size, size);
-		read_intanger_from_istream(in, &result.morph_index_size, size);
-		read_intanger_from_istream(in, &result.rigid_body_index_size, size);
+		read_intanger_from_istream(in, &buffer.vertex_index_size, size);
+		read_intanger_from_istream(in, &buffer.texture_index_size, size);
+		read_intanger_from_istream(in, &buffer.material_index_size, size);
+		read_intanger_from_istream(in, &buffer.bone_index_size, size);
+		read_intanger_from_istream(in, &buffer.morph_index_size, size);
+		read_intanger_from_istream(in, &buffer.rigid_body_index_size, size);
 
-		return result;
+		return traits::construct(buffer);
 	}
 
-	template<typename Str, typename StrSizeType = std::size_t, typename StrTraits = count_construct_container_traits<Str, StrSizeType>>
-	pmx_info<Str> load_info(std::istream& in, encode_type encode)
+	template<typename T, typename traits = pmx_info_traits<T>, std::size_t CharBufferSize = 512>
+	T load_info(std::istream& in)
 	{
-		pmx_info<Str> result;
+		using char_type = typename traits::char_type;
 
-		std::int32_t len;
-		auto const char_size = static_cast<std::int32_t>(encode);
+		pmx_info_buffer<char_type, CharBufferSize> buffer{};
 
 		// モデル名の取得
-		read_from_istream(in, &len);
-		result.model_name = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.model_name, len / char_size, char_size);
+		read_from_istream(in, &buffer.model_name_size);
+		read_from_istream(in, &buffer.model_name[0], buffer.model_name_size);
 
 		// モデルの英語名の取得
-		read_from_istream(in, &len);
-		result.english_mode_name = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.english_mode_name, len / char_size, char_size);
+		read_from_istream(in, &buffer.english_model_name_size);
+		read_from_istream(in, &buffer.english_model_name[0], buffer.english_model_name_size);
 
 		// コメントの取得
-		read_from_istream(in, &len);
-		result.comment = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.comment, len / char_size, char_size);
+		read_from_istream(in, &buffer.comment_size);
+		read_from_istream(in, &buffer.comment[0], buffer.comment_size);
 
 		// 英語のコメントの取得
-		read_from_istream(in, &len);
-		result.english_comment = StrTraits::construct(static_cast<StrTraits::size_type>(len));
-		read_array_from_istream<StrTraits>(in, &result.english_comment, len / char_size, char_size);
+		read_from_istream(in, &buffer.english_comment_size);
+		read_from_istream(in, &buffer.english_comment[0], buffer.english_comment_size);
 
-		return result;
+		return traits::construct(buffer);
 	}
 
 
 	// 頂点情報の読み込み
-	template<template<typename> typename Container, constructible_vec2 Vec2, constructible_vec3 Vec3, constructible_vec4 Vec4,
-		typename BoneIndex = std::int32_t, typename  HeaderDataType = std::uint8_t, typename ContainterSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>>, ContainterSizeType>>
-		Container<pmx_vertex<Vec2, Vec3, Vec4, BoneIndex>> load_vertex(std::istream& in, HeaderDataType add_uv_number, HeaderDataType bone_index_size)
+	template<typename T, typename traits = pmx_vertex_traits<T>>
+	T load_vertex(std::istream& in, std::size_t add_uv_number, std::size_t bone_index_size)
 	{
 		// 頂点の数を取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
-		// コンテナの生成
-		auto result = ContainerTraits::construct(static_cast<ContainerTraits::size_type>(num));
+		auto result = traits::construct(static_cast<std::size_t>(num));
+
+		pmx_vertex_buffer buffer{};
 
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			read_vec3_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).position);
-			read_vec3_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).normal);
-			read_vec2_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).uv);
+			read_from_istream(in, &buffer.position);
+			read_from_istream(in, &buffer.normal);
+			read_from_istream(in, &buffer.uv);
 
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				read_vec4_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).additional_uv[j]);
+				read_from_istream(in, &buffer.additional_uv[i]);
 			}
 
 			// ウェイト変形方式の取得
-			std::uint8_t weight_type;
-			read_from_istream(in, &weight_type);
+			read_from_istream(in, &buffer.weight_type);
 
-			switch (weight_type)
+			switch (buffer.weight_type)
 			{
 				// BDEF1の場合
 			case 0:
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[0], bone_index_size);
-				// 単一のボーンの重みが1であることを示す
-				ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0] = 1.f;
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+
 				break;
 
 				// BDEF2の場合
 			case 1:
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[1], bone_index_size);
-				read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0]);
-				// 2本のボーンの重みは合計1になる
-				ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[1] = 1.f - ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0];
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[1], bone_index_size);
+				read_from_istream(in, &buffer.bone_weight[0]);
+
 				break;
 
 				// BDEF4の場合
 			case 2:
-				// 4つのボーンのインデックスの取得
-				for (std::size_t j = 0; j < 4; j++)
-					read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[j], bone_index_size);
-				// 4つのボーンの重みの取得
-				for (std::size_t j = 0; j < 4; j++)
-					read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[j]);
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[1], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[2], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[3], bone_index_size);
+
+				read_from_istream(in, &buffer.bone_weight[0]);
+				read_from_istream(in, &buffer.bone_weight[1]);
+				read_from_istream(in, &buffer.bone_weight[2]);
+				read_from_istream(in, &buffer.bone_weight[3]);
+
 				break;
 
 				// SDEFの倍
 			case 3:
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[0], bone_index_size);
-				read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).bone[1], bone_index_size);
-				read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).weight[0]);
+				read_intanger_from_istream(in, &buffer.bone_index[0], bone_index_size);
+				read_intanger_from_istream(in, &buffer.bone_index[1], bone_index_size);
+				read_from_istream(in, &buffer.bone_weight[0]);
 				// ここまでBDEF2と同じ
-				std::array<Vec3, 3> sdef;
-				for (std::size_t j = 0; j < 3; j++)
-					read_from_istream(in, &sdef[j]);
-				ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).sdef = std::move(sdef);
+
+				read_from_istream(in, &buffer.sdef_c);
+				read_from_istream(in, &buffer.sdef_r0);
+				read_from_istream(in, &buffer.sdef_r1);
+
 				break;
 			}
 
-			// エッジ倍率の取得
-			read_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)).edge_magnification);
+			read_from_istream(in, &buffer.edge_factor);
 
+			traits::emplace_back(result, buffer, add_uv_number);
+
+			// 一応、初期化しておく
+			buffer.bone_index = {};
+			buffer.bone_weight = {};
+			buffer.sdef_c = {};
+			buffer.sdef_r0 = {};
+			buffer.sdef_r1 = {};
 		}
 
 		return result;
-
 	}
 
 	// 面情報の読み込み
-	template<template<typename> typename Container, typename VertexIndex = std::int32_t, typename HeaderDataType = std::uint8_t, typename ContainerSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_surface<VertexIndex>>, ContainerSizeType>>
-		Container<pmx_surface<VertexIndex>> load_surface(std::istream& in, HeaderDataType vertex_index_size)
+	template<typename T, typename traits = pmx_surface_traits<T>>
+	T load_surface(std::istream& in, std::size_t vertex_index_size)
 	{
 		// 面の数の取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
 		// コンテナの大きさ設定
-		auto result = ContainerTraits::construct(static_cast<ContainerTraits::size_type>(num));
+		auto result = traits::construct(static_cast<std::size_t>(num));
 
+		std::size_t index{};
 		// それぞれの情報を取得
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			read_intanger_from_istream(in, &ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i)), vertex_index_size);
+			read_intanger_from_istream(in, &index, vertex_index_size);
+			traits::emplace_back(result, index);
 		}
 
 		return result;
 	}
 
 	// テクスチャパスの読み込み
-	template<template<typename> typename Container, typename Str, typename ContainerSizeType = std::size_t, typename StrSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<Str>, ContainerSizeType>, typename StrTraits = count_construct_container_traits<Str, ContainerSizeType>>
-		Container<Str> load_texture_path(std::istream& in, encode_type encode)
+	template<typename T, typename traits = pmx_texture_path_traits<T>, std::size_t CharBufferSize = 64>
+	T load_texture_path(std::istream& in)
 	{
+		using char_type = traits::char_type;
+
 		// コンテナのサイズの指定
 		std::int32_t num;
 		read_from_istream(in, &num);
-		auto result = ContainerTraits::construct(num);
+		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		// 文字の大きさ
-		auto const char_size = static_cast<StrTraits::size_type>(encode);
+		std::int32_t texture_path_size{};
+		std::array<char_type, CharBufferSize> texture_path_buffer{};
 
 		// 1文字列ごとに取得していく
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
 			// 長さの取得
-			std::int32_t len;
-			read_from_istream(in, &len);
+			read_from_istream(in, &texture_path_size);
 
 			// 文字列の読み込み
-			auto str = StrTraits::construct(static_cast<StrTraits::size_type>(len / char_size));
-			read_array_from_istream<StrTraits>(in, &str, len / char_size, char_size);
+			read_from_istream(in, &texture_path_buffer[0], texture_path_size);
 
 			// 文字列を格納
-			ContainerTraits::get_reference(result, static_cast<StrTraits::size_type>(i)) = std::move(str);
+			traits::emplace_back(result,
+				texture_path_size % 2 == 0 ? texture_path_size / sizeof(char_type) : (texture_path_size + 1) / sizeof(char_type), texture_path_buffer);
+
+			// 初期化しておく
+			std::fill(std::begin(texture_path_buffer), std::end(texture_path_buffer), 0);
 		}
 
 		return result;
 	}
 
 	// マテリアルの読み込み
-	template<template<typename>typename Container, typename Str, constructible_vec3 Vec3, constructible_vec4 Vec4,
-		typename TextureIndex = std::int32_t, typename HeaderDataType = std::uint8_t, typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_material<Str, Vec3, Vec4, TextureIndex>>, ContianerSizeType>,
-		typename StrTraits = count_construct_container_traits<Str, StrSizeType>>
-		Container<pmx_material<Str, Vec3, Vec4, TextureIndex>> load_material(std::istream& in, encode_type encode, HeaderDataType texture_index_size)
+	template<typename T, typename traits = pmx_material_traits<T>, std::size_t CharBufferSize = 64>
+	T load_material(std::istream& in, std::size_t texture_index_size)
 	{
+		using char_type = traits::char_type;
 
 		// マテリアルの数の取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
 		// コンテナの大きさ指定し構築
-		auto result = ContainerTraits::construct(num);
+		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		// 文字の大きさ
-		auto const char_size = static_cast<StrTraits::size_type>(encode);
+		pmx_material_buffer<char_type, CharBufferSize> buffer{};
 
 		// それぞれのマテリアルの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			// 読み込むマテリアル
-			auto& material = ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i));
-
-			// 文字列を読み込む際に使用
-			std::int32_t len;
-
 			// 名前
-			read_from_istream(in, &len);
-			material.name = StrTraits::construct(len);
-			read_array_from_istream<StrTraits>(in, &material.name, len / char_size, char_size);
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
 
 			// 英語の名前
-			read_from_istream(in, &len);
-			material.english_name = StrTraits::construct(len);
-			read_array_from_istream<StrTraits>(in, &material.english_name, len / char_size, char_size);
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
 
 			// 色情報
-			read_vec4_from_istream(in, &material.diffuse);
-			read_vec3_from_istream(in, &material.specular);
-			read_from_istream(in, &material.specularity);
-			read_vec3_from_istream(in, &material.ambient);
+			read_from_istream(in, &buffer.diffuse);
+			read_from_istream(in, &buffer.specular);
+			read_from_istream(in, &buffer.specularity);
+			read_from_istream(in, &buffer.ambient);
 
 			// 描画フラグ
-			std::uint8_t flag;
-			read_from_istream(in, &flag);
-			material.draw_flag_bits = { flag };
+			read_from_istream(in, &buffer.bit_flag);
 
 			// エッジ
-			read_vec4_from_istream(in, &material.edge_color);
-			read_from_istream(in, &material.edge_size);
+			read_from_istream(in, &buffer.edge_color);
+			read_from_istream(in, &buffer.edge_size);
 
 			// テクスチャ
-			read_intanger_from_istream(in, &material.texture_index, texture_index_size);
-			read_intanger_from_istream(in, &material.sphere_texture_index, texture_index_size);
+			read_intanger_from_istream(in, &buffer.texture_index, texture_index_size);
+			read_intanger_from_istream(in, &buffer.sphere_texture_index, texture_index_size);
 
 			// スフィアモード
-			std::uint8_t sphere;
-			read_from_istream(in, &sphere);
-			switch (sphere)
-			{
-				// 無効
-			case 0:
-				material.sphere_mode_value = sphere_mode::none;
-				break;
-
-				// 乗算
-			case 1:
-				material.sphere_mode_value = sphere_mode::sph;
-				break;
-
-				// 加算
-			case 2:
-				material.sphere_mode_value = sphere_mode::spa;
-				break;
-
-				// サブテクスチャ
-			case 3:
-				material.sphere_mode_value = sphere_mode::subtexture;
-				break;
-			}
+			read_from_istream(in, &buffer.sphere_mode);
 
 			// トゥーン
-			std::uint8_t toon;
-			read_from_istream(in, &toon);
+			read_from_istream(in, &buffer.toon_flag);
 
-			switch (toon)
-			{
-				// 個別
-			case 0:
-				material.toon_type_value = toon_type::unshared;
-				read_from_istream(in, &material.toon_texture, texture_index_size);
-				break;
-
-				// 共有
-			case 1:
-				material.toon_type_value = toon_type::shared;
-				// 共有の場合のインデックスの場合のサイズは1byte
-				read_from_istream(in, &material.toon_texture, 1);
-				break;
+			// 個別トゥーンの場合
+			if (buffer.toon_flag == 0) {
+				read_intanger_from_istream(in, &buffer.toon_index, texture_index_size);
+			}
+			//共有トゥーンの場合
+			else {
+				read_intanger_from_istream(in, &buffer.toon_index, 1);
 			}
 
 			// メモ
-			read_from_istream(in, &len);
-			material.memo = StrTraits::construct(len);
-			read_array_from_istream<StrTraits>(in, &material.memo, len / char_size, char_size);
+			read_from_istream(in, &buffer.memo_size);
+			read_from_istream(in, &buffer.memo[0], buffer.memo_size);
 
 			// 面の数
-			read_from_istream(in, &material.vertex_number);
+			read_from_istream(in, &buffer.vertex_num);
 
+			// 要素を追加
+			traits::emplace_back(result, buffer);
+
+
+			// 初期化しておく
+			std::fill(std::begin(buffer.name), std::end(buffer.name), 0);
+			std::fill(std::begin(buffer.english_name), std::end(buffer.english_name), 0);
+			std::fill(std::begin(buffer.memo), std::end(buffer.memo), 0);
 		}
 
 		return result;
@@ -321,129 +287,120 @@ namespace mmdl
 	}
 
 	// ボーンの読み込み
-	template<template<typename>typename Container, typename Str, typename Vec3, template<typename> typename IKContainer, typename BoneIndex = std::int32_t, typename HeaderDataType = std::uint8_t,
-		typename ContianerSizeType = std::size_t, typename StrSizeType = std::size_t, typename IKContainerSizeType = std::size_t,
-		typename ContainerTraits = count_construct_container_traits<Container<pmx_bone<Str, Vec3, IKContainer, BoneIndex>>, ContianerSizeType>,
-		typename StrTraits = count_construct_container_traits<Str, StrSizeType>,
-		typename IKContainerTraits = count_construct_container_traits<IKContainer<ik_link<Vec3, BoneIndex>>, IKContainerSizeType>>
-		Container<pmx_bone<Str, Vec3, IKContainer, BoneIndex>> load_bone(std::istream& in, encode_type encode, HeaderDataType bone_index_size)
+	template<typename T, typename traits = pmx_bone_traits<T>, std::size_t BufferNum = 64, std::size_t IKLinkBufferNum = 16>
+	T load_bone(std::istream& in, std::size_t bone_index_size)
 	{
+		using char_type = traits::char_type;
+
 		// ボーンの数の取得
 		std::int32_t num;
 		read_from_istream(in, &num);
 
 		// コンテナの大きさ指定し構築
-		auto result = ContainerTraits::construct(num);
+		auto result = traits::construct(num);
 
-		// 文字の大きさ
-		auto const char_size = static_cast<StrTraits::size_type>(encode);
+		pmx_bone_buffer<char_type, BufferNum, IKLinkBufferNum> buffer{};
 
 		// それぞれのボーンの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
-			// 読み込むボーン
-			auto& bone = ContainerTraits::get_reference(result, static_cast<ContainerTraits::size_type>(i));
-
-			// 文字列を読み込む際に使用
-			std::int32_t len;
-
 			// 名前
-			read_from_istream(in, &len);
-			bone.name = StrTraits::construct(static_cast<StrTraits::size_type>(len / char_size));
-			read_array_from_istream<StrTraits>(in, &bone.name, len / char_size, char_size);
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
+			// 大きさから要素数へ変更
+			buffer.name_size = buffer.name_size % 2 == 0 ? buffer.name_size / sizeof(char_type) : (buffer.name_size + 1) / sizeof(char_type);
 
 			// 英語の名前
-			read_from_istream(in, &len);
-			bone.english_name = StrTraits::construct(static_cast<StrTraits::size_type>(len / char_size));
-			read_array_from_istream<StrTraits>(in, &bone.english_name, len / char_size, char_size);
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
+			// 大きさ可rあ要素数へ変更
+			buffer.english_name_size = buffer.english_name_size % 2 == 0 ? buffer.english_name_size / sizeof(char_type) : (buffer.english_name_size + 1) / sizeof(char_type);
 
 			// 位置
-			read_vec3_from_istream(in, &bone.position);
+			read_from_istream(in, &buffer.position);
 
 			// 親ボーン
-			read_intanger_from_istream(in, &bone.parent_index, bone_index_size);
+			read_from_istream(in, &buffer.parent_bone_index, bone_index_size);
 
 			// 変形階層
-			read_from_istream(in, &bone.trannsformation_level);
+			read_from_istream(in, &buffer.transformation_level);
 
 			// ボーンフラグ
-			std::uint16_t bone_flag{};
-			read_from_istream(in, &bone_flag);
-			bone.bone_flag_bits = { bone_flag };
+			read_from_istream(in, &buffer.bone_flag);
 
-			// 接続
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::access_point)])
+			// 接続先
+			if ((buffer.bone_flag & 0x0001) == 0)
 			{
-				read_intanger_from_istream(in, &bone.access_point_index, bone_index_size);
+				read_from_istream(in, &buffer.access_point_offset);
 			}
 			else
 			{
-				read_vec3_from_istream(in, &bone.access_point_offset);
+				read_intanger_from_istream(in, &buffer.access_bone_index, bone_index_size);
 			}
 
 			// 回転付与または移動付与
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::rotation_grant)] ||
-				bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::move_grant)])
+			if ((buffer.bone_flag & 0x0100) != 0 || (buffer.bone_flag & 0x0200) != 0)
 			{
-				read_intanger_from_istream(in, &bone.grant_index, bone_index_size);
-				read_from_istream(in, &bone.grant_rate);
+				read_intanger_from_istream(in, &buffer.assign_bone_index, bone_index_size);
+				read_from_istream(in, &buffer.assign_rate);
 			}
 
 			// 軸固定
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::fix_axis)])
+			if ((buffer.bone_flag & 0x0400) != 0)
 			{
-				read_vec3_from_istream(in, &bone.fix_axis_direction);
+				read_from_istream(in, &buffer.fixed_axis_direction);
 			}
 
 			// ローカル軸
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::local_axis)])
+			if ((buffer.bone_flag & 0x0800) != 0)
 			{
-				read_vec3_from_istream(in, &bone.local_axis_x);
-				read_vec3_from_istream(in, &bone.local_axis_z);
+				read_from_istream(in, &buffer.local_x_axis_direction);
+				read_from_istream(in, &buffer.local_z_axis_direction);
 			}
 
 			// 外部親変形
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::external_parent_deformation)])
+			if ((buffer.bone_flag & 0x2000) != 0)
 			{
-				read_from_istream(in, &bone.external_parent_deformation_key);
+				read_from_istream(in, &buffer.key_value);
 			}
 
 			// IK
-			if (bone.bone_flag_bits[static_cast<std::size_t>(bone_flag::ik)])
+			if ((buffer.bone_flag & 0x0020) != 0)
 			{
-				read_intanger_from_istream(in, &bone.ik_target_bone, bone_index_size);
-				read_from_istream(in, &bone.ik_roop_number);
-				read_from_istream(in, &bone.ik_rook_angle);
+				read_intanger_from_istream(in, &buffer.ik_target_bone, bone_index_size);
+				read_from_istream(in, &buffer.ik_loop_num);
+				read_from_istream(in, &buffer.ik_angle_limit_par_process);
 
 				// IK数の取得
-				std::int32_t ik_num;
-				read_from_istream(in, &ik_num);
+				read_from_istream(in, &buffer.ik_link_size);
 
-				// コンテナの大きさ指定
-				bone.ik_link = IKContainerTraits::construct(ik_num);
-
-				for (std::size_t j = 0; j < ik_num; j++)
+				for (std::size_t j = 0; j < buffer.ik_link_size; j++)
 				{
-					read_intanger_from_istream(in, &bone.ik_link[j].bone, bone_index_size);
+					auto& [ik_bone_index, ik_is_angle_limit, ik_angle_limit_bottom, ik_angle_limit_top] = buffer.ik_link[j];
+
+					read_intanger_from_istream(in, &ik_bone_index, bone_index_size);
 
 					// 角度制限
-					std::uint8_t is_angle_limit;
-					read_from_istream(in, &is_angle_limit);
+					read_from_istream(in, &ik_is_angle_limit);
 
-					if (is_angle_limit == 1)
+					if (ik_is_angle_limit == 1)
 					{
 						// 下限
-						Vec3 min;
-						read_vec3_from_istream(in, &min);
+						read_from_istream(in, &ik_angle_limit_bottom);
 
 						// 上限
-						Vec3 max;
-						read_vec3_from_istream(in, &max);
-
-						bone.ik_link[j].min_max_angle_limit = { std::move(min),std::move(max) };
+						read_from_istream(in, &ik_angle_limit_top);
 					}
 				}
 			}
+
+			// 要素の追加
+			traits::emplace_back(result, buffer);
+
+			// 一応、初期化しておく
+			std::fill(std::begin(buffer.name), std::end(buffer.name), 0);
+			std::fill(std::begin(buffer.english_name), std::end(buffer.english_name), 0);
+			buffer.ik_link = {};
 		}
 
 		return result;
