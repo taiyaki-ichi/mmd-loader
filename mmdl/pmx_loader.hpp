@@ -1,12 +1,10 @@
 #pragma once
-#include"utility.hpp"
-#include"generics_type.hpp"
-#include<concepts>
 #include"pmx_buffer.hpp"
+#include"pmx_loader_traits.hpp"
+#include"utility.hpp"
 
 namespace mmdl
 {
-
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
 	template<typename T, typename traits = pmx_header_traits<T>>
