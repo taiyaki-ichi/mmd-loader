@@ -1,5 +1,4 @@
 #pragma once
-#include"pmx_data.hpp"
 #include"utility.hpp"
 #include"generics_type.hpp"
 #include<concepts>
