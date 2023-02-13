@@ -1,5 +1,4 @@
 #pragma once
-#include"generics_type.hpp"
 #include<istream>
 #include<regex>
 #include"vpd_loader_traits.hpp"

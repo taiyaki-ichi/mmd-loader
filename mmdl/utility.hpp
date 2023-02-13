@@ -1,7 +1,6 @@
 #pragma once
 #include<istream>
 #include<Windows.h>
-#include"generics_type.hpp"
 
 namespace mmdl
 {
@@ -55,36 +54,6 @@ namespace mmdl
 		{
 			read_from_istream(in, &Traits::get_reference(*out, i), stride);
 		}
-	}
-
-	template<constructible_vec2 T>
-	void read_vec2_from_istream(std::istream& in, T* out)
-	{
-		float x, y;
-		read_from_istream(in, &x);
-		read_from_istream(in, &y);
-		*out = constructible_vec2_traits<T>::construct(x, y);
-	}
-
-	template<constructible_vec3 T>
-	void read_vec3_from_istream(std::istream& in, T* out)
-	{
-		float x, y, z;
-		read_from_istream(in, &x);
-		read_from_istream(in, &y);
-		read_from_istream(in, &z);
-		*out = constructible_vec3_traits<T>::construct(x, y, z);
-	}
-
-	template<constructible_vec4 T>
-	void read_vec4_from_istream(std::istream& in, T* out)
-	{
-		float x, y, z, w;
-		read_from_istream(in, &x);
-		read_from_istream(in, &y);
-		read_from_istream(in, &z);
-		read_from_istream(in, &w);
-		*out = constructible_vec4_traits<T>::construct(x, y, z, w);
 	}
 
 	// utf16‚©‚çutf8‚Ö‚Ì•ÏŠ·
