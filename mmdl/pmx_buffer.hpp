@@ -1,5 +1,6 @@
 #pragma once
 #include<array>
+#include<variant>
 
 namespace mmdl
 {
@@ -240,7 +241,7 @@ namespace mmdl
 	};
 
 
-	// 頂点モーフの要素
+	// 頂点モーフ
 	// 頂点のオフセット
 	struct pmx_vertex_morph_buffer
 	{
@@ -251,7 +252,7 @@ namespace mmdl
 		std::array<float, 3> offset{};
 	};
 
-	// uvモーフの要素
+	// uvモーフ
 	// uvオフセット値
 	// 通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
 	struct pmx_uv_morph_buffer
@@ -263,8 +264,8 @@ namespace mmdl
 		std::array<float, 4> offset{};
 	};
 
-	// ボーンモーフの要素
-	struct pmx_bone_morph_buffer 
+	// ボーンモーフ
+	struct pmx_bone_morph_buffer
 	{
 		// 対象のボーンのインデックス
 		std::size_t index{};
@@ -276,7 +277,7 @@ namespace mmdl
 		std::array<float, 4> quaternion{};
 	};
 
-	// 材質モーフの要素
+	// 材質モーフ
 	struct pmx_material_morph_buffer
 	{
 		// 対象のマテリアルのインデックス
@@ -311,7 +312,7 @@ namespace mmdl
 
 	};
 
-	// グループモーフの要素
+	// グループモーフ
 	struct pmx_group_morph_buffer
 	{
 		// 対象のモーフのインデックス
@@ -321,6 +322,36 @@ namespace mmdl
 		// グループモーフのモーフ値 * モーフ率 = 対象モーフのモーフ値
 		float morph_factor{};
 	};
+
+	// モーフのバッファ
+	template<typename CharType, std::size_t CharBufferSize>
+	struct pmx_morph_buffer
+	{
+		// 名前
+		std::int32_t name_size{};
+		std::array<CharType, CharBufferSize> name{};
+
+		// 英語の名前
+		std::int32_t english_name_size{};
+		std::array<CharType, CharBufferSize> english_name{};
+
+		// 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
+		std::uint8_t control_panel_option{};
+
+		// モーフ種類 - 0:グループ, 1 : 頂点, 2 : ボーン, 3 : UV, 4 : 追加UV1, 5 : 追加UV2, 6 : 追加UV3, 7 : 追加UV4, 8 : 材質
+		std::uint8_t morph_type{};
+
+		// モーフの種類ごとのデータ
+		std::variant<pmx_vertex_morph_buffer, pmx_uv_morph_buffer, pmx_bone_morph_buffer,
+			pmx_material_morph_buffer, pmx_group_morph_buffer> morph_data{};
+
+		static constexpr std::size_t VERTEX_MORPH_INDEX = 0;
+		static constexpr std::size_t UV_MORPH_INDEX = 1;
+		static constexpr std::size_t BONE_MORPH_INDEX = 2;
+		static constexpr std::size_t MATERIAL_MORPH_INDEX = 3;
+		static constexpr std::size_t GROUP_MORPH_INDEX = 4;
+	};
+
 
 
 }
