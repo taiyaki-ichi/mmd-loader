@@ -324,7 +324,7 @@ namespace mmdl
 	};
 
 	// モーフのバッファ
-	template<typename CharType, std::size_t CharBufferSize>
+	template<typename CharType, std::size_t CharBufferSize,std::size_t MorphBufferNum>
 	struct pmx_morph_buffer
 	{
 		// 名前
@@ -341,9 +341,13 @@ namespace mmdl
 		// モーフ種類 - 0:グループ, 1 : 頂点, 2 : ボーン, 3 : UV, 4 : 追加UV1, 5 : 追加UV2, 6 : 追加UV3, 7 : 追加UV4, 8 : 材質
 		std::uint8_t morph_type{};
 
+		// 以降のモーフのデータの数
+		std::int32_t morph_data_num{};
+
 		// モーフの種類ごとのデータ
-		std::variant<pmx_vertex_morph_buffer, pmx_uv_morph_buffer, pmx_bone_morph_buffer,
-			pmx_material_morph_buffer, pmx_group_morph_buffer> morph_data{};
+		using morph_type_variant = std::variant<pmx_vertex_morph_buffer, pmx_uv_morph_buffer, pmx_bone_morph_buffer,
+			pmx_material_morph_buffer, pmx_group_morph_buffer>;
+		std::array<morph_type_variant, MorphBufferNum> morph_data{};
 
 		static constexpr std::size_t VERTEX_MORPH_INDEX = 0;
 		static constexpr std::size_t UV_MORPH_INDEX = 1;

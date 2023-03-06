@@ -126,8 +126,8 @@ namespace mmdl
 		static T construct(std::size_t size);
 
 		// ÉÇÅ[ÉtÇí«â¡
-		template<std::size_t CharBufferNum>
-		static void emplace_back(T&, pmx_morph_buffer<char_type, CharBufferNum> const&);
+		template<std::size_t CharBufferNum, std::size_t MorphDataNum>
+		static void emplace_back(T&, pmx_morph_buffer<char_type, CharBufferNum, MorphDataNum> const&);
 	};
 
 }
