@@ -407,7 +407,7 @@ namespace mmdl
 	}
 
 	// モーフの読み込み
-	template<typename T, typename traits = pmx_morph_traits<T>, std::size_t CharBufferSize = 64, std::size_t MorphDataSize = 1024>
+	template<typename T, typename traits = pmx_morph_traits<T>, std::size_t CharBufferSize = 64, std::size_t MorphDataSize = 2048>
 	T load_morph(std::istream& in, std::size_t vertex_index_size, std::size_t bone_index_size, std::size_t material_index_size, std::size_t morph_index_size)
 	{
 		using char_type = traits::char_type;
@@ -421,6 +421,12 @@ namespace mmdl
 
 		std::int32_t morph_element_num{};
 		pmx_morph_buffer<char_type, CharBufferSize, MorphDataSize> buffer{};
+
+		pmx_vertex_morph_buffer vertex_morph{};
+		pmx_uv_morph_buffer uv_morph{};
+		pmx_bone_morph_buffer bone_morph{};
+		pmx_material_morph_buffer material_morph{};
+		pmx_group_morph_buffer group_morph{};
 
 		// それぞれのモーフの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -450,9 +456,10 @@ namespace mmdl
 				
 				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
 				{
-					auto& group_morph = std::get<decltype(buffer)::GROUP_MORPH_INDEX>(buffer.morph_data[j]);
 					read_intanger_from_istream(in, &group_morph.index, morph_index_size);
 					read_from_istream(in, &group_morph.morph_factor);
+
+					buffer.morph_data[j] = group_morph;
 				}
 
 				break;
@@ -462,9 +469,10 @@ namespace mmdl
 			case 1:
 				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
 				{
-					auto& vertex_morph = std::get<decltype(buffer)::VERTEX_MORPH_INDEX>(buffer.morph_data[j]);
 					read_intanger_from_istream(in, &vertex_morph.index, vertex_index_size);
 					read_from_istream(in, &vertex_morph.offset);
+
+					buffer.morph_data[j] = vertex_morph;
 				}
 
 				break;
@@ -474,10 +482,11 @@ namespace mmdl
 			case 2:
 				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
 				{
-					auto& bone_morph = std::get<decltype(buffer)::BONE_MORPH_INDEX>(buffer.morph_data[j]);
 					read_intanger_from_istream(in, &bone_morph.index, bone_index_size);
 					read_from_istream(in, &bone_morph.transform);
 					read_from_istream(in, &bone_morph.quaternion);
+
+					buffer.morph_data[j] = bone_morph;
 				}
 
 				break;
@@ -492,9 +501,10 @@ namespace mmdl
 			case 7:
 				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
 				{
-					auto& uv_morph = std::get<decltype(buffer)::UV_MORPH_INDEX>(buffer.morph_data[j]);
 					read_intanger_from_istream(in, &uv_morph.index, vertex_index_size);
 					read_from_istream(in, &uv_morph.offset);
+
+					buffer.morph_data[j] = uv_morph;
 				}
 
 				break;
@@ -504,8 +514,6 @@ namespace mmdl
 			case 8:
 				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
 				{
-					auto& material_morph = std::get<decltype(buffer)::MATERIAL_MORPH_INDEX>(buffer.morph_data[j]);
-
 					read_intanger_from_istream(in, &material_morph.index, material_index_size);
 					read_from_istream(in, &material_morph.offset_type);
 					read_from_istream(in, &material_morph.diffuse);
@@ -517,6 +525,8 @@ namespace mmdl
 					read_from_istream(in, &material_morph.texture_factor);
 					read_from_istream(in, &material_morph.sphere_texture_factor);
 					read_from_istream(in, &material_morph.toon_texture_factor);
+
+					buffer.morph_data[j] = material_morph;
 				}
 
 				break;
@@ -530,5 +540,6 @@ namespace mmdl
 
 		}
 
+		return result;
 	}
 }
