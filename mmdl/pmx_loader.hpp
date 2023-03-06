@@ -405,4 +405,285 @@ namespace mmdl
 
 		return result;
 	}
+
+	// モーフの読み込み
+	template<typename T, typename traits = pmx_morph_traits<T>, std::size_t CharBufferSize = 64>
+	T load_morph(std::istream& in, std::size_t vertex_index_size, std::size_t bone_index_size, std::size_t material_index_size, std::size_t morph_index_size)
+	{
+		using char_type = traits::char_type;
+
+		// モーフの数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		// コンテナの大きさ指定し構築
+		auto result = traits::construct(num);
+
+		std::int32_t name_size{};
+		std::array<char_type, CharBufferSize> name{};
+		std::int32_t english_name_size{};
+		std::array<char_type, CharBufferSize> english_name{};
+		std::uint8_t control_panel_option{};
+
+		// モーフの種類
+		// 0:グループ, 1:頂点, 2:ボーン, 3:UV, 4:追加UV1, 5:追加UV2, 6:追加UV3, 7:追加UV4, 8:材質
+		std::uint8_t morph_type{};
+
+		// モーフの要素数
+		std::int32_t morph_element_num{};
+
+		pmx_vertex_morph_buffer vertex_morph_buffer{};
+		pmx_uv_morph_buffer uv_morph_buffer{};
+		pmx_bone_morph_buffer bone_morph_buffer{};
+		pmx_material_morph_buffer material_morph_buffer{};
+		pmx_group_morph_buffer group_morph_buffer{};
+
+		// それぞれのモーフの読み込み
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			// 名前
+			read_from_istream(in, &name_size);
+			read_from_istream(in, &name[0], name_size);
+			// 大きさから要素数へ変更
+			name_size = name_size % 2 == 0 ? name_size / sizeof(char_type) : (name_size + 1) / sizeof(char_type);
+
+			// 英語の名前
+			read_from_istream(in, &english_name_size);
+			read_from_istream(in, &english_name[0], english_name_size);
+			// 大きさから要素数へ変更
+			english_name_size = english_name_size % 2 == 0 ? english_name_size / sizeof(char_type) : (english_name_size + 1) / sizeof(char_type);
+
+			read_from_istream(in, &control_panel_option);
+
+			read_from_istream(in, &morph_type);
+
+			read_from_istream(in, &morph_element_num);
+
+			switch (morph_type)
+			{
+				// グループ
+			case 0:
+				auto group_morph = traits::group_morph_traits::construct(
+					name_size,
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &group_morph_buffer.index, morph_index_size);
+					read_from_istream(in, &group_morph_buffer.morph_factor);
+					traits::group_morph_traits::emplace_back(group_morph, group_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_group_morph(result, std::move(group_morph));
+
+				break;
+
+
+				// 頂点
+			case 1:
+				auto vertex_morph = traits::vertex_morph_traits::construct(
+					name_size,
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &vertex_morph_buffer.index, vertex_index_size);
+					read_from_istream(in, &vertex_morph_buffer.offset);
+
+					traits::vertex_morph_traits::emplace_back(in, vertex_morph_buffer);
+				}
+
+				// 追加
+				traits::emplce_back_vartex_morph(result, std::move(vertex_morph));
+
+				break;
+
+
+				// ボーン
+			case 2:
+				auto bone_morph = traits::bone_morph_traits::construct(name_size,
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &bone_morph_buffer.index, bone_index_size);
+					read_from_istream(in, &bone_morph_buffer.transform);
+					read_from_istream(in, &bone_morph_buffer.quaternion);
+
+					traits::bone_morph_traits::emplace_back(bone_morph, bone_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_bone_morph(result, std::move(bone_morph));
+
+				break;
+
+
+				// uv
+			case 3:
+				auto uv_morph = traits::uv_morph_traits::construct(
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &uv_morph_buffer.index, vertex_index_size);
+					read_from_istream(in, &uv_morph_buffer.offset);
+
+					traits::uv_morph_traits::emplace_back(uv_morph, uv_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_uv_morph(result, std::move(uv_morph));
+
+				break;
+
+
+				// 追加uv1
+			case 4:
+				auto additional_uv_1_morph = traits::additional_uv_1_morph::construct(
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &uv_morph_buffer.index, vertex_index_size);
+					read_from_istream(in, &uv_morph_buffer.offset);
+
+					traits::additional_uv_1_morph::emplace_back(uv_morph, uv_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_additional_uv_1(result, std::move(additional_uv_1_morph));
+
+				break;
+
+
+				// 追加uv2
+			case 5:
+				auto additional_uv_2_morph = traits::additional_uv_2_morph::construct(
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &uv_morph_buffer.index, vertex_index_size);
+					read_from_istream(in, &uv_morph_buffer.offset);
+
+					traits::additional_uv_2_morph::emplace_back(uv_morph, uv_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_additional_uv_2(result, std::move(additional_uv_2_morph));
+
+				break;
+
+
+				// 追加uv3
+			case 6:
+				auto additional_uv_3_morph = traits::additional_uv_3_morph::construct(
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &uv_morph_buffer.index, vertex_index_size);
+					read_from_istream(in, &uv_morph_buffer.offset);
+
+					traits::additional_uv_3_morph::emplace_back(uv_morph, uv_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_additional_uv_3(result, std::move(additional_uv_3_morph));
+
+				break;
+
+
+				// 追加uv4
+			case 7:
+				auto additional_uv_4_morph = traits::additional_uv_4_morph::construct(
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &uv_morph_buffer.index, vertex_index_size);
+					read_from_istream(in, &uv_morph_buffer.offset);
+
+					traits::additional_uv_4_morph::emplace_back(uv_morph, uv_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back_additional_uv_4(result, std::move(additional_uv_4_morph));
+
+				break;
+
+
+				// マテリアル
+			case 8:
+				auto material_morph = traits::material_morph_traits::construct(
+					name,
+					english_name,
+					english_name_size,
+					morph_element_num
+				);
+
+				for (std::size_t j = 0; j < static_cast<std::size_t>(morph_element_num); j++)
+				{
+					read_intanger_from_istream(in, &material_morph_buffer.index, material_index_size);
+					read_from_istream(in, &material_morph_buffer.offset_type);
+					read_from_istream(in, &material_morph_buffer.diffuse);
+					read_from_istream(in, &material_morph_buffer.specular);
+					read_from_istream(in, &material_morph_buffer.specularity);
+					read_from_istream(in, &material_morph_buffer.ambient);
+					read_from_istream(in, &material_morph_buffer.edge_color);
+					read_from_istream(in, &material_morph_buffer.edge_size);
+					read_from_istream(in, &material_morph_buffer.texture_factor);
+					read_from_istream(in, &material_morph_buffer.sphere_texture_factor);
+					read_from_istream(in, &material_morph_buffer.toon_texture_factor);
+
+					traits::material_morph_traits::emplace_back(material_morph, material_morph_buffer);
+				}
+
+				// 追加
+				traits::emplace_back(result, std::move(material_morph));
+
+				break;
+			}
+
+
+			std::fill(name.begin(), name.end(), 0);
+			std::fill(english_name.begin(), english_name.end(), 0);
+
+		}
+
+	}
 }

@@ -116,70 +116,238 @@ namespace mmdl
 	// morph
 	//
 
-	// 各モーフのトレイツ
-	template<typename T, typename Buffer>
-	struct pmx_morph_element_traits
+	// 頂点モーフ
+	template<typename T>
+	struct pmx_vertex_morph_traits
 	{
 		using value_type = void;
+		using char_type = void;
 
 		// 構築
-		template<typename CharType, std::size_t CharBufferSize>
+		template<std::size_t CharBufferSize>
 		static T construct(
-			std::array<CharType, CharBufferSize> const& name,
-			std::array<CharType, CharBufferSize> const& english_name,
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
 			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
 			std::int32_t size);
 
 		// 要素の追加
-		static void emplace_back(T& vertex_morph, Buffer const&);
+		static void emplace_back(T& vertex_morph, pmx_vertex_morph_buffer const&);
 	};
-
-	// それぞれのモーフのインスタンス
-
-	// 頂点モーフ
-	template<typename T>
-	using pmx_vertex_morph_traits = pmx_morph_element_traits<T, pmx_vertex_morph_buffer>;
 
 	// uvモーフ
 	template<typename T>
-	using pmx_uv_morph_traits = pmx_morph_element_traits<T, pmx_uv_morph_buffer>;
+	struct pmx_uv_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_uv_morph_buffer const&);
+	};
 
 	// ボーンモーフ
 	template<typename T>
-	using pmx_bone_morph_traits = pmx_morph_element_traits<T, pmx_bone_morph_buffer>;
+	struct pmx_bone_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_bone_morph_buffer const&);
+	};
 
 	// マテリアルモーフ
 	template<typename T>
-	using pmx_material_morph_traits = pmx_morph_element_traits<T, pmx_material_morph_buffer>;
+	struct pmx_material_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_material_buffer const&);
+	};
+
+	// グループモーフ
+	template<typename T>
+	struct pmx_group_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_group_morph_buffer const&);
+	};
+
+	// 追加uv1モーフ
+	template<typename T>
+	struct pmx_addtional_uv_1_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_uv_morph_buffer const&);
+	};
+
+	// 追加uv2モーフ
+	template<typename T>
+	struct pmx_addtional_uv_2_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_uv_morph_buffer const&);
+	};
+
+	// 追加uv3モーフ
+	template<typename T>
+	struct pmx_addtional_uv_3_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_uv_morph_buffer const&);
+	};
+
+	// 追加uv4モーフ
+	template<typename T>
+	struct pmx_addtional_uv_4_morph_traits
+	{
+		using value_type = void;
+		using char_type = void;
+
+		// 構築
+		template<std::size_t CharBufferSize>
+		static T construct(
+			std::int32_t name_size,
+			std::array<char_type, CharBufferSize> const& name,
+			std::int32_t english_name_size,
+			std::array<char_type, CharBufferSize> const& english_name,
+			std::uint8_t control_panel_option,/*操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約*/
+			std::int32_t size);
+
+		// 要素の追加
+		static void emplace_back(T& vertex_morph, pmx_uv_morph_buffer const&);
+	};
 
 	// モーフのトレイツ
-	template<typename T,
-		typename VertexMorphTraits = pmx_vertex_morph_traits<T>,
-		typename UVMorphTraits = pmx_uv_morph_traits<T>,
-		typename BoneMorphTraits = pmx_bone_morph_traits<T>,
-		typename MaterialMorphTraits = pmx_material_morph_traits<T>
-	>
+	template<typename T>
 	struct pmx_morph_traits
 	{
-		using vertex_morph_traits = VertexMorphTraits;
-		using uv_morph_traits = UVMorphTraits;
-		using bone_morph_traits = BoneMorphTraits;
-		using material_morph_traits = MaterialMorphTraits;
+		using vertex_morph_traits = pmx_bone_morph_traits<T>;
+		using uv_morph_traits = pmx_uv_morph_traits<T>;
+		using bone_morph_traits = pmx_bone_morph_traits<T>;
+		using material_morph_traits = pmx_material_morph_traits<T>;
+		using group_morph_traits = pmx_group_morph_traits<T>;
+		using addtional_uv_1_morph_traits = pmx_addtional_uv_1_morph_traits<T>;
+		using addtional_uv_2_morph_traits = pmx_addtional_uv_2_morph_traits<T>;
+		using addtional_uv_3_morph_traits = pmx_addtional_uv_3_morph_traits<T>;
+		using addtional_uv_4_morph_traits = pmx_addtional_uv_4_morph_traits<T>;
 
 		// サイズを指定して構築
 		static T construct(std::size_t size);
 
 		// 頂点モーフを追加
-		static void emplace_back(T&, vertex_morph_traits::value_type&&);
+		static void emplace_back_vertex_morph(T&, vertex_morph_traits::value_type&&);
 
 		// UVモーフを追加
-		static void emplace_back(T&, uv_morph_traits::value_type&&);
+		static void emplace_back_uv_morph(T&, uv_morph_traits::value_type&&);
 
 		// ボーンモーフを追加
-		static void emplace_back(T&, bone_morph_traits::value_type&&);
+		static void emplace_back_bone_morph(T&, bone_morph_traits::value_type&&);
 
 		// マテリアルモーフを追加
-		static void emplace_back(T&, material_morph_traits::value_type&&);
+		static void emplace_back_material_morph(T&, material_morph_traits::value_type&&);
+
+		// グループモーフを追加
+		static void emplace_back_group_morph(T&, group_morph_traits::value_type&&);
+
+		// 追加UV1モーフを追加
+		static void emplace_back_adittional_uv_1_morph(T&, addtional_uv_1_morph_traits::value_type&&);
+
+		// 追加UV2モーフを追加
+		static void emplace_back_adittional_uv_2_morph(T&, addtional_uv_2_morph_traits::value_type&&);
+
+		// 追加UV3モーフを追加
+		static void emplace_back_adittional_uv_3_morph(T&, addtional_uv_3_morph_traits::value_type&&);
+
+		// 追加UV4モーフを追加
+		static void emplace_back_adittional_uv_4_morph(T&, addtional_uv_4_morph_traits::value_type&&);
 
 	};
 
