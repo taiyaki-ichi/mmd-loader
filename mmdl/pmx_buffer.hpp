@@ -238,5 +238,90 @@ namespace mmdl
 		// ikリンク
 		std::array<ik_link_type, IKLinkBufferNum> ik_link{};
 	};
+
+
+	// 頂点モーフの要素
+	// 頂点のオフセット
+	struct pmx_vertex_morph_buffer
+	{
+		// 対象の頂点のインデックス
+		std::size_t index{};
+
+		// 座標のオフセット値
+		std::array<float, 3> offset{};
+	};
+
+	// uvモーフの要素
+	// uvオフセット値
+	// 通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+	struct pmx_uv_morph_buffer
+	{
+		// 対象の頂点のインデックス
+		std::size_t index{};
+
+		// uvのオフセット値
+		std::array<float, 4> offset{};
+	};
+
+	// ボーンモーフの要素
+	struct pmx_bone_morph_buffer 
+	{
+		// 対象のボーンのインデックス
+		std::size_t index{};
+
+		// 移動量
+		std::array<float, 3> transform{};
+
+		// 回転量（クォータニオン）
+		std::array<float, 4> quaternion{};
+	};
+
+	// 材質モーフの要素
+	struct pmx_material_morph_buffer
+	{
+		// 対象のマテリアルのインデックス
+		std::size_t index{};
+
+		// オフセット形式
+		//  0:乗算, 1:加算
+		std::uint8_t offset_type{};
+
+		// ディフューズ
+		std::array<float, 4> diffuse{};
+		// スぺキュラ
+		std::array<float, 3> specular{};
+		// スぺキュラ係数
+		float specularity{};
+		// アンビエント
+		std::array<float, 3> ambient{};
+
+		// エッジの色
+		std::array<float, 4> edge_color{};
+		// エッジの大きさ
+		float edge_size{};
+
+		// テスクチャ係数
+		std::array<float, 4> texture_factor{};
+
+		// スフィアテクスチャ係数
+		std::array<float, 4> sphere_texture_factor{};
+
+		// トゥーンテクスチャ係数
+		std::array<float, 4> toon_texture_factor{};
+
+	};
+
+	// グループモーフの要素
+	struct pmx_group_morph_buffer
+	{
+		// 対象のモーフのインデックス
+		std::size_t index{};
+
+		// モーフ率
+		// グループモーフのモーフ値 * モーフ率 = 対象モーフのモーフ値
+		float morph_factor{};
+	};
+
+
 }
 
