@@ -17,4 +17,11 @@ namespace mmdl
 		static void emplace_back(T& frame_data, vmd_frame_data_buffer const&);
 	};
 
+	template<typename T>
+	struct vmd_morph_data_traits
+	{
+		static T construct(std::size_t size);
+
+		static void emplace_back(T&, vmd_morph_data_buffer&);
+	};
 }
