@@ -112,4 +112,22 @@ namespace mmdl
 		static void emplace_back(T& bone, pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const&);
 	};
 
+	//
+	// morph
+	//
+
+	// モーフのトレイツ
+	template<typename T>
+	struct pmx_morph_traits
+	{
+		using char_type = void;
+
+		// サイズを指定して構築
+		static T construct(std::size_t size);
+
+		// モーフを追加
+		template<std::size_t CharBufferNum, std::size_t MorphDataNum>
+		static void emplace_back(T&, pmx_morph_buffer<char_type, CharBufferNum, MorphDataNum> const&);
+	};
+
 }

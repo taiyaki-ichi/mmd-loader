@@ -405,4 +405,141 @@ namespace mmdl
 
 		return result;
 	}
+
+	// モーフの読み込み
+	template<typename T, typename traits = pmx_morph_traits<T>, std::size_t CharBufferSize = 64, std::size_t MorphDataSize = 2048>
+	T load_morph(std::istream& in, std::size_t vertex_index_size, std::size_t bone_index_size, std::size_t material_index_size, std::size_t morph_index_size)
+	{
+		using char_type = traits::char_type;
+
+		// モーフの数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		// コンテナの大きさ指定し構築
+		auto result = traits::construct(num);
+
+		std::int32_t morph_element_num{};
+		pmx_morph_buffer<char_type, CharBufferSize, MorphDataSize> buffer{};
+
+		pmx_vertex_morph_buffer vertex_morph{};
+		pmx_uv_morph_buffer uv_morph{};
+		pmx_bone_morph_buffer bone_morph{};
+		pmx_material_morph_buffer material_morph{};
+		pmx_group_morph_buffer group_morph{};
+
+		// それぞれのモーフの読み込み
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			// 名前
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
+			// 大きさから要素数へ変更
+			buffer.name_size = buffer.name_size % 2 == 0 ? buffer.name_size / sizeof(char_type) : (buffer.name_size + 1) / sizeof(char_type);
+
+			// 英語の名前
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
+			// 大きさから要素数へ変更
+			buffer.english_name_size = buffer.english_name_size % 2 == 0 ? buffer.english_name_size / sizeof(char_type) : (buffer.english_name_size + 1) / sizeof(char_type);
+
+			read_from_istream(in, &buffer.control_panel_option);
+
+			read_from_istream(in, &buffer.morph_type);
+
+			read_from_istream(in, &buffer.morph_data_num);
+
+			switch (buffer.morph_type)
+			{
+				// グループ
+			case 0:
+				
+				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
+				{
+					read_intanger_from_istream(in, &group_morph.index, morph_index_size);
+					read_from_istream(in, &group_morph.morph_factor);
+
+					buffer.morph_data[j] = group_morph;
+				}
+
+				break;
+
+
+				// 頂点
+			case 1:
+				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
+				{
+					read_intanger_from_istream(in, &vertex_morph.index, vertex_index_size);
+					read_from_istream(in, &vertex_morph.offset);
+
+					buffer.morph_data[j] = vertex_morph;
+				}
+
+				break;
+
+
+				// ボーン
+			case 2:
+				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
+				{
+					read_intanger_from_istream(in, &bone_morph.index, bone_index_size);
+					read_from_istream(in, &bone_morph.transform);
+					read_from_istream(in, &bone_morph.quaternion);
+
+					buffer.morph_data[j] = bone_morph;
+				}
+
+				break;
+
+
+				// uv
+			case 3:
+				// 追加uv1-4
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
+				{
+					read_intanger_from_istream(in, &uv_morph.index, vertex_index_size);
+					read_from_istream(in, &uv_morph.offset);
+
+					buffer.morph_data[j] = uv_morph;
+				}
+
+				break;
+
+
+				// マテリアル
+			case 8:
+				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
+				{
+					read_intanger_from_istream(in, &material_morph.index, material_index_size);
+					read_from_istream(in, &material_morph.offset_type);
+					read_from_istream(in, &material_morph.diffuse);
+					read_from_istream(in, &material_morph.specular);
+					read_from_istream(in, &material_morph.specularity);
+					read_from_istream(in, &material_morph.ambient);
+					read_from_istream(in, &material_morph.edge_color);
+					read_from_istream(in, &material_morph.edge_size);
+					read_from_istream(in, &material_morph.texture_factor);
+					read_from_istream(in, &material_morph.sphere_texture_factor);
+					read_from_istream(in, &material_morph.toon_texture_factor);
+
+					buffer.morph_data[j] = material_morph;
+				}
+
+				break;
+			}
+
+			traits::emplace_back(result, buffer);
+
+
+			std::fill(buffer.name.begin(), buffer.name.end(), 0);
+			std::fill(buffer.english_name.begin(), buffer.english_name.end(), 0);
+
+		}
+
+		return result;
+	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include<array>
+#include<variant>
 
 namespace mmdl
 {
@@ -238,5 +239,124 @@ namespace mmdl
 		// ikリンク
 		std::array<ik_link_type, IKLinkBufferNum> ik_link{};
 	};
+
+
+	// 頂点モーフ
+	// 頂点のオフセット
+	struct pmx_vertex_morph_buffer
+	{
+		// 対象の頂点のインデックス
+		std::size_t index{};
+
+		// 座標のオフセット値
+		std::array<float, 3> offset{};
+	};
+
+	// uvモーフ
+	// uvオフセット値
+	// 通常UVはz,wが不要項目になるがモーフとしてのデータ値は記録しておく
+	struct pmx_uv_morph_buffer
+	{
+		// 対象の頂点のインデックス
+		std::size_t index{};
+
+		// uvのオフセット値
+		std::array<float, 4> offset{};
+	};
+
+	// ボーンモーフ
+	struct pmx_bone_morph_buffer
+	{
+		// 対象のボーンのインデックス
+		std::size_t index{};
+
+		// 移動量
+		std::array<float, 3> transform{};
+
+		// 回転量（クォータニオン）
+		std::array<float, 4> quaternion{};
+	};
+
+	// 材質モーフ
+	struct pmx_material_morph_buffer
+	{
+		// 対象のマテリアルのインデックス
+		std::size_t index{};
+
+		// オフセット形式
+		//  0:乗算, 1:加算
+		std::uint8_t offset_type{};
+
+		// ディフューズ
+		std::array<float, 4> diffuse{};
+		// スぺキュラ
+		std::array<float, 3> specular{};
+		// スぺキュラ係数
+		float specularity{};
+		// アンビエント
+		std::array<float, 3> ambient{};
+
+		// エッジの色
+		std::array<float, 4> edge_color{};
+		// エッジの大きさ
+		float edge_size{};
+
+		// テスクチャ係数
+		std::array<float, 4> texture_factor{};
+
+		// スフィアテクスチャ係数
+		std::array<float, 4> sphere_texture_factor{};
+
+		// トゥーンテクスチャ係数
+		std::array<float, 4> toon_texture_factor{};
+
+	};
+
+	// グループモーフ
+	struct pmx_group_morph_buffer
+	{
+		// 対象のモーフのインデックス
+		std::size_t index{};
+
+		// モーフ率
+		// グループモーフのモーフ値 * モーフ率 = 対象モーフのモーフ値
+		float morph_factor{};
+	};
+
+	// モーフのバッファ
+	template<typename CharType, std::size_t CharBufferSize,std::size_t MorphBufferNum>
+	struct pmx_morph_buffer
+	{
+		// 名前
+		std::int32_t name_size{};
+		std::array<CharType, CharBufferSize> name{};
+
+		// 英語の名前
+		std::int32_t english_name_size{};
+		std::array<CharType, CharBufferSize> english_name{};
+
+		// 操作パネル (PMD:カテゴリ) 1:眉(左下) 2:目(左上) 3:口(右上) 4:その他(右下)  | 0:システム予約
+		std::uint8_t control_panel_option{};
+
+		// モーフ種類 - 0:グループ, 1 : 頂点, 2 : ボーン, 3 : UV, 4 : 追加UV1, 5 : 追加UV2, 6 : 追加UV3, 7 : 追加UV4, 8 : 材質
+		std::uint8_t morph_type{};
+
+		// 以降のモーフのデータの数
+		std::int32_t morph_data_num{};
+
+		// モーフの種類ごとのデータ
+		using morph_type_variant = std::variant<pmx_vertex_morph_buffer, pmx_uv_morph_buffer, pmx_bone_morph_buffer,
+			pmx_material_morph_buffer, pmx_group_morph_buffer>;
+		std::array<morph_type_variant, MorphBufferNum> morph_data{};
+
+		static constexpr std::size_t VERTEX_MORPH_INDEX = 0;
+		static constexpr std::size_t UV_MORPH_INDEX = 1;
+		static constexpr std::size_t BONE_MORPH_INDEX = 2;
+		static constexpr std::size_t MATERIAL_MORPH_INDEX = 3;
+		static constexpr std::size_t GROUP_MORPH_INDEX = 4;
+	};
+
+
+
 }
 

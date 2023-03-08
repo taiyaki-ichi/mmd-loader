@@ -32,4 +32,16 @@ namespace mmdl
 		std::array<char, 64> complement_parameter{};
 	};
 
+	struct vmd_morph_data_buffer
+	{
+		// 名前
+		// サイズは固定
+		std::array<char, 15> name{};
+
+		// フレーム番号
+		std::uint32_t frame_num{};
+
+		// 表情スライダーの値
+		float weight{};
+	};
 }

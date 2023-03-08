@@ -18,6 +18,7 @@ namespace mmdl
 		read_from_istream(in, &buffer.name);
 
 		// フレームデータ数
+		// TODO: load_vmd_frame_dataで読み込むようにする
 		read_from_istream(in, &buffer.frame_data_num);
 
 		return traits::construct(buffer);
@@ -49,6 +50,33 @@ namespace mmdl
 			read_from_istream(in, &buffer.complement_parameter);
 
 			// 要素を追加
+			traits::emplace_back(result, buffer);
+		}
+
+		return result;
+	}
+
+	template<typename T, typename traits = vmd_morph_data_traits<T>>
+	T load_vmd_morph_data(std::istream& in)
+	{
+		std::uint32_t size{};
+		read_from_istream(in, &size);
+
+		auto result = traits::construct(size);
+
+		vmd_morph_data_buffer buffer{};
+
+		for (std::size_t i = 0; i < size; i++)
+		{
+			// モーフ名
+			read_from_istream(in, &buffer.name);
+
+			// フレーム番号
+			read_from_istream(in, &buffer.frame_num);
+
+			// 重み
+			read_from_istream(in, &buffer.weight);
+
 			traits::emplace_back(result, buffer);
 		}
 
