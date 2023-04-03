@@ -130,4 +130,20 @@ namespace mmdl
 		static void emplace_back(T&, pmx_morph_buffer<char_type, CharBufferNum, MorphDataNum> const&);
 	};
 
+	//
+	// rigidbody
+	//
+	template<typename T>
+	struct pmx_rigidbody_traits
+	{
+		using char_type = void;
+
+		// サイズを指定して構築
+		static T construct(std::size_t size);
+
+		// 剛体を追加
+		template<std::size_t CharBufferNum>
+		static void emplace_back(T&, pmx_rigidbody_buffer<char_type, CharBufferNum> const&);
+	};
+
 }
