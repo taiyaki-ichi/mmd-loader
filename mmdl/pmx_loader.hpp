@@ -453,7 +453,7 @@ namespace mmdl
 			{
 				// グループ
 			case 0:
-				
+
 				for (std::size_t j = 0; j < static_cast<std::size_t>(buffer.morph_data_num); j++)
 				{
 					read_intanger_from_istream(in, &group_morph.index, morph_index_size);
@@ -538,6 +538,103 @@ namespace mmdl
 			std::fill(buffer.name.begin(), buffer.name.end(), 0);
 			std::fill(buffer.english_name.begin(), buffer.english_name.end(), 0);
 
+		}
+
+		return result;
+	}
+
+	// TODO: 標示枠の読み込み
+	inline void load_display_frame(std::istream& in,std::size_t bone_index_size,std::size_t morph_index_size)
+	{
+		// 数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		std::int32_t strnum{};
+		std::wstring str{};
+		std::uint8_t flag{};
+		std::int32_t num2;
+		std::uint8_t flag2{};
+		std::size_t index{};
+
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			read_from_istream(in, &strnum);
+			str.resize(strnum);
+			read_from_istream(in, str.data(), strnum);
+
+			read_from_istream(in, &strnum);
+			str.resize(strnum);
+			read_from_istream(in, str.data(), strnum);
+
+			read_from_istream(in, &flag);
+
+			read_from_istream(in, &num2);
+
+			for (std::size_t j = 0; j < static_cast<std::size_t>(num2); j++)
+			{
+				read_from_istream(in, &flag2);
+
+				if (flag2 == 0)
+					read_intanger_from_istream(in, &index, bone_index_size);
+				else 
+					read_intanger_from_istream(in, &index, morph_index_size);
+			}
+		}
+	}
+
+	// 剛体の読み込み
+	template<typename T, typename traits = pmx_rigidbody_traits<T>, std::size_t CharBufferSize = 64>
+	T load_rigidbody(std::istream& in, std::size_t bone_index_size)
+	{
+		using char_type = traits::char_type;
+
+		// 数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		// コンテナの大きさ指定し構築
+		auto result = traits::construct(num);
+
+		pmx_rigidbody_buffer<char_type, CharBufferSize> buffer{};
+
+		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			// 名前
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
+			// 大きさから要素数へ変更
+			buffer.name_size = buffer.name_size % 2 == 0 ? buffer.name_size / sizeof(char_type) : (buffer.name_size + 1) / sizeof(char_type);
+
+			// 英語の名前
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
+			// 大きさから要素数へ変更
+			buffer.english_name_size = buffer.english_name_size % 2 == 0 ? buffer.english_name_size / sizeof(char_type) : (buffer.english_name_size + 1) / sizeof(char_type);
+
+			read_intanger_from_istream(in, &buffer.bone_index, bone_index_size);
+
+			read_from_istream(in, &buffer.group);
+			read_from_istream(in, &buffer.non_collision_group);
+
+			read_from_istream(in, &buffer.shape);
+			read_from_istream(in, &buffer.size);
+
+			read_from_istream(in, &buffer.position);
+			read_from_istream(in, &buffer.rotation);
+
+			read_from_istream(in, &buffer.mass);
+			read_from_istream(in, &buffer.liner_damping);
+			read_from_istream(in, &buffer.angular_damping);
+			read_from_istream(in, &buffer.restitution);
+			read_from_istream(in, &buffer.friction);
+
+			read_from_istream(in, &buffer.rigidbody_type);
+
+			traits::emplace_back(result, buffer);
+
+			std::fill(buffer.name.begin(), buffer.name.end(), 0);
+			std::fill(buffer.english_name.begin(), buffer.english_name.end(), 0);
 		}
 
 		return result;
