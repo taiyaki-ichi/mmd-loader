@@ -112,6 +112,7 @@ namespace mmdl
 		static void emplace_back(T& bone, pmx_bone_buffer<char_type, CharBufferSize, IKLinkBufferSize> const&);
 	};
 
+
 	//
 	// morph
 	//
@@ -130,9 +131,11 @@ namespace mmdl
 		static void emplace_back(T&, pmx_morph_buffer<char_type, CharBufferNum, MorphDataNum> const&);
 	};
 
+
 	//
 	// rigidbody
 	//
+
 	template<typename T>
 	struct pmx_rigidbody_traits
 	{
@@ -144,6 +147,24 @@ namespace mmdl
 		// 剛体を追加
 		template<std::size_t CharBufferNum>
 		static void emplace_back(T&, pmx_rigidbody_buffer<char_type, CharBufferNum> const&);
+	};
+
+
+	//
+	// Joint
+	//
+
+	template<typename T>
+	struct pmx_joint_traits
+	{
+		using char_type = void;
+
+		// サイズを指定して構築
+		static T construct(std::size_t size);
+
+		// ジョイントを追加
+		template<std::size_t CharBufferNum>
+		static void emplace_back(T&, pmx_joint_buffer<char_type, CharBufferNum> const&);
 	};
 
 }

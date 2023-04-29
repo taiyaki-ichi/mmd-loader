@@ -639,4 +639,58 @@ namespace mmdl
 
 		return result;
 	}
+
+	// ジョイントの読み込み
+	template<typename T, typename traits = pmx_joint_traits<T>, std::size_t CharBufferSize = 64>
+	T load_joint(std::istream& in, std::size_t rigidbody_index_size)
+	{
+		using char_type = traits::char_type;
+
+		// 数の取得
+		std::int32_t num;
+		read_from_istream(in, &num);
+
+		// コンテナの大きさ指定し構築
+		auto result = traits::construct(num);
+
+		pmx_joint_buffer<char_type, CharBufferSize> buffer{};
+
+		for(std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
+		{
+			// 名前
+			read_from_istream(in, &buffer.name_size);
+			read_from_istream(in, &buffer.name[0], buffer.name_size);
+			// 大きさから要素数へ変更
+			buffer.name_size = buffer.name_size % 2 == 0 ? buffer.name_size / sizeof(char_type) : (buffer.name_size + 1) / sizeof(char_type);
+
+			// 英語の名前
+			read_from_istream(in, &buffer.english_name_size);
+			read_from_istream(in, &buffer.english_name[0], buffer.english_name_size);
+			// 大きさから要素数へ変更
+			buffer.english_name_size = buffer.english_name_size % 2 == 0 ? buffer.english_name_size / sizeof(char_type) : (buffer.english_name_size + 1) / sizeof(char_type);
+
+			read_from_istream(in, &buffer.type);
+
+			read_intanger_from_istream(in, &buffer.rigidbody_a, rigidbody_index_size);
+			read_intanger_from_istream(in, &buffer.rigidbody_b, rigidbody_index_size);
+
+			read_from_istream(in, &buffer.position);
+			read_from_istream(in, &buffer.rotation);
+
+			read_from_istream(in, &buffer.move_lower_limit);
+			read_from_istream(in, &buffer.move_upper_limit);
+			read_from_istream(in, &buffer.rotation_lower_limit);
+			read_from_istream(in, &buffer.rotation_upper_limit);
+
+			read_from_istream(in, &buffer.move_spring_constant);
+			read_from_istream(in, &buffer.rotation_spring_constant);
+
+			traits::emplace_back(result, buffer);
+
+			std::fill(buffer.name.begin(), buffer.name.end(), 0);
+			std::fill(buffer.english_name.begin(), buffer.english_name.end(), 0);
+		}
+
+		return result;
+	}
 }
