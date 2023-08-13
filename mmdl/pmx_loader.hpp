@@ -86,7 +86,7 @@ namespace mmdl
 			// 追加uvの取得
 			for (std::size_t j = 0; j < add_uv_number; j++)
 			{
-				read_from_istream(in, &buffer.additional_uv[i]);
+				read_from_istream(in, &buffer.additional_uv[j]);
 			}
 
 			// ウェイト変形方式の取得
@@ -320,7 +320,7 @@ namespace mmdl
 			read_from_istream(in, &buffer.position);
 
 			// 親ボーン
-			read_from_istream(in, &buffer.parent_bone_index, bone_index_size);
+			read_intanger_from_istream(in, &buffer.parent_bone_index, bone_index_size);
 
 			// 変形階層
 			read_from_istream(in, &buffer.transformation_level);
