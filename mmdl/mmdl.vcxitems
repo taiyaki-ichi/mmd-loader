@@ -14,9 +14,15 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)generics_type.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)pmx_data.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)pmx_buffer.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)pmx_loader.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)pmx_loader_traits.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)utility.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vmd_buffer.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vmd_loader.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vmd_loader_traits.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vpd_buffer.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vpd_loader.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)vpd_loader_traits.hpp" />
   </ItemGroup>
 </Project>
