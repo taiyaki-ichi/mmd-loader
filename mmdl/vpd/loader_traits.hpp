@@ -1,5 +1,5 @@
 #pragma once
-#include"vpd_buffer.hpp"
+#include"buffer.hpp"
 
 namespace mmdl
 {

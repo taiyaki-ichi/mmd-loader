@@ -1,8 +1,8 @@
 #pragma once
 #include<istream>
 #include<regex>
-#include"vpd_loader_traits.hpp"
-#include"vpd_buffer.hpp"
+#include"loader_traits.hpp"
+#include"buffer.hpp"
 
 namespace mmdl
 {

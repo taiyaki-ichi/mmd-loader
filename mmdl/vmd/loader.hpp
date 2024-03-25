@@ -1,7 +1,7 @@
 #pragma once
-#include"utility.hpp"
+#include"../utility/io_helper.hpp"
 #include<istream>
-#include"vmd_loader_traits.hpp"
+#include"loader_traits.hpp"
 
 namespace mmdl
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include<vector>
-#include"pmx_buffer.hpp"
+#include"buffer.hpp"
 
 namespace mmdl
 {

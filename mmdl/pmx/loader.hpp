@@ -1,7 +1,7 @@
 #pragma once
-#include"pmx_buffer.hpp"
-#include"pmx_loader_traits.hpp"
-#include"utility.hpp"
+#include"buffer.hpp"
+#include"loader_traits.hpp"
+#include"../utility/io_helper.hpp"
 
 namespace mmdl
 {
