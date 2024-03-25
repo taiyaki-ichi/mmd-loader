@@ -1,9 +1,9 @@
 #pragma once
 #include<array>
 
-namespace mmdl
+namespace mmdl::vmd
 {
-	struct vmd_header_buffer
+	struct header_buffer
 	{
 		// 名前
 		// サイズは固定
@@ -13,7 +13,7 @@ namespace mmdl
 		std::uint32_t frame_data_num{};
 	};
 
-	struct vmd_frame_data_buffer
+	struct frame_buffer
 	{
 		// 名前
 		// サイズは固定
@@ -32,7 +32,7 @@ namespace mmdl
 		std::array<char, 64> complement_parameter{};
 	};
 
-	struct vmd_morph_data_buffer
+	struct morph_buffer
 	{
 		// 名前
 		// サイズは固定

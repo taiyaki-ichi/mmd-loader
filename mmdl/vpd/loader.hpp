@@ -4,10 +4,10 @@
 #include"loader_traits.hpp"
 #include"buffer.hpp"
 
-namespace mmdl
+namespace mmdl::vpd
 {
 	template<typename T, typename traits = vpd_data_traits<T>, std::size_t CharBufferSize = 256>
-	T load_vpd_data(std::istream& in)
+	T load(std::istream& in)
 	{
 		T result;
 
@@ -17,7 +17,7 @@ namespace mmdl
 		std::string str2{};
 		str2.resize(CharBufferSize);
 
-		vpd_buffer buffer{};
+		buffer buffer{};
 
 		std::regex commentout{ "(.*)//(.*)" };
 		std::regex osm{ "\\w+\\.osm" };

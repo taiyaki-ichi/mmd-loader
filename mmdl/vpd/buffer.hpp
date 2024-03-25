@@ -2,9 +2,9 @@
 #include<string>
 #include<array>
 
-namespace mmdl
+namespace mmdl::vpd
 {
-	struct vpd_buffer
+	struct buffer
 	{
 		std::string name{};
 		std::array<float, 3> transform{};

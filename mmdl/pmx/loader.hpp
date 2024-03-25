@@ -3,14 +3,14 @@
 #include"loader_traits.hpp"
 #include"../utility/io_helper.hpp"
 
-namespace mmdl
+namespace mmdl::pmx
 {
 	// ヘッダの読み込み
 	// pmx2.0以降はDataのサイズは1byteなのでデフォルトはuint8_t
-	template<typename T, typename traits = pmx_header_traits<T>>
+	template<typename T, typename traits = header_traits<T>>
 	T load_header(std::istream& in)
 	{
-		pmx_header_buffer buffer{};
+		header_buffer buffer{};
 
 		// 最初の4文字はいらない「Pmx 」の文字
 		in.seekg(4);
@@ -37,12 +37,12 @@ namespace mmdl
 		return traits::construct(buffer);
 	}
 
-	template<typename T, typename traits = pmx_info_traits<T>, std::size_t CharBufferSize = 512>
+	template<typename T, typename traits = info_traits<T>, std::size_t CharBufferSize = 512>
 	T load_info(std::istream& in)
 	{
 		using char_type = typename traits::char_type;
 
-		pmx_info_buffer<char_type, CharBufferSize> buffer{};
+		info_buffer<char_type, CharBufferSize> buffer{};
 
 		// モデル名の取得
 		read_from_istream(in, &buffer.model_name_size);
@@ -65,7 +65,7 @@ namespace mmdl
 
 
 	// 頂点情報の読み込み
-	template<typename T, typename traits = pmx_vertex_traits<T>>
+	template<typename T, typename traits = vertex_traits<T>>
 	T load_vertex(std::istream& in, std::size_t add_uv_number, std::size_t bone_index_size)
 	{
 		// 頂点の数を取得
@@ -74,7 +74,7 @@ namespace mmdl
 
 		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		pmx_vertex_buffer buffer{};
+		vertex_buffer buffer{};
 
 		// それぞれの頂点の取得
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -152,7 +152,7 @@ namespace mmdl
 	}
 
 	// 面情報の読み込み
-	template<typename T, typename traits = pmx_surface_traits<T>>
+	template<typename T, typename traits = surface_traits<T>>
 	T load_surface(std::istream& in, std::size_t vertex_index_size)
 	{
 		// 面の数の取得
@@ -174,7 +174,7 @@ namespace mmdl
 	}
 
 	// テクスチャパスの読み込み
-	template<typename T, typename traits = pmx_texture_path_traits<T>, std::size_t CharBufferSize = 64>
+	template<typename T, typename traits = texture_path_traits<T>, std::size_t CharBufferSize = 64>
 	T load_texture_path(std::istream& in)
 	{
 		using char_type = traits::char_type;
@@ -208,7 +208,7 @@ namespace mmdl
 	}
 
 	// マテリアルの読み込み
-	template<typename T, typename traits = pmx_material_traits<T>, std::size_t CharBufferSize = 64>
+	template<typename T, typename traits = material_traits<T>, std::size_t CharBufferSize = 64>
 	T load_material(std::istream& in, std::size_t texture_index_size)
 	{
 		using char_type = traits::char_type;
@@ -220,7 +220,7 @@ namespace mmdl
 		// コンテナの大きさ指定し構築
 		auto result = traits::construct(static_cast<std::size_t>(num));
 
-		pmx_material_buffer<char_type, CharBufferSize> buffer{};
+		material_buffer<char_type, CharBufferSize> buffer{};
 
 		// それぞれのマテリアルの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -287,7 +287,7 @@ namespace mmdl
 	}
 
 	// ボーンの読み込み
-	template<typename T, typename traits = pmx_bone_traits<T>, std::size_t BufferNum = 64, std::size_t IKLinkBufferNum = 16>
+	template<typename T, typename traits = bone_traits<T>, std::size_t BufferNum = 64, std::size_t IKLinkBufferNum = 16>
 	T load_bone(std::istream& in, std::size_t bone_index_size)
 	{
 		using char_type = traits::char_type;
@@ -299,7 +299,7 @@ namespace mmdl
 		// コンテナの大きさ指定し構築
 		auto result = traits::construct(num);
 
-		pmx_bone_buffer<char_type, BufferNum, IKLinkBufferNum> buffer{};
+		bone_buffer<char_type, BufferNum, IKLinkBufferNum> buffer{};
 
 		// それぞれのボーンの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -407,7 +407,7 @@ namespace mmdl
 	}
 
 	// モーフの読み込み
-	template<typename T, typename traits = pmx_morph_traits<T>, std::size_t CharBufferSize = 64, std::size_t MorphDataSize = 2048>
+	template<typename T, typename traits = morph_traits<T>, std::size_t CharBufferSize = 64, std::size_t MorphDataSize = 2048>
 	T load_morph(std::istream& in, std::size_t vertex_index_size, std::size_t bone_index_size, std::size_t material_index_size, std::size_t morph_index_size)
 	{
 		using char_type = traits::char_type;
@@ -420,13 +420,13 @@ namespace mmdl
 		auto result = traits::construct(num);
 
 		std::int32_t morph_element_num{};
-		pmx_morph_buffer<char_type, CharBufferSize, MorphDataSize> buffer{};
+		morph_buffer<char_type, CharBufferSize, MorphDataSize> buffer{};
 
-		pmx_vertex_morph_buffer vertex_morph{};
-		pmx_uv_morph_buffer uv_morph{};
-		pmx_bone_morph_buffer bone_morph{};
-		pmx_material_morph_buffer material_morph{};
-		pmx_group_morph_buffer group_morph{};
+		vertex_morph_buffer vertex_morph{};
+		uv_morph_buffer uv_morph{};
+		bone_morph_buffer bone_morph{};
+		material_morph_buffer material_morph{};
+		group_morph_buffer group_morph{};
 
 		// それぞれのモーフの読み込み
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
@@ -584,7 +584,7 @@ namespace mmdl
 	}
 
 	// 剛体の読み込み
-	template<typename T, typename traits = pmx_rigidbody_traits<T>, std::size_t CharBufferSize = 64>
+	template<typename T, typename traits = rigidbody_traits<T>, std::size_t CharBufferSize = 64>
 	T load_rigidbody(std::istream& in, std::size_t bone_index_size)
 	{
 		using char_type = traits::char_type;
@@ -596,7 +596,7 @@ namespace mmdl
 		// コンテナの大きさ指定し構築
 		auto result = traits::construct(num);
 
-		pmx_rigidbody_buffer<char_type, CharBufferSize> buffer{};
+		rigidbody_buffer<char_type, CharBufferSize> buffer{};
 
 		for (std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{
@@ -641,7 +641,7 @@ namespace mmdl
 	}
 
 	// ジョイントの読み込み
-	template<typename T, typename traits = pmx_joint_traits<T>, std::size_t CharBufferSize = 64>
+	template<typename T, typename traits = joint_traits<T>, std::size_t CharBufferSize = 64>
 	T load_joint(std::istream& in, std::size_t rigidbody_index_size)
 	{
 		using char_type = traits::char_type;
@@ -653,7 +653,7 @@ namespace mmdl
 		// コンテナの大きさ指定し構築
 		auto result = traits::construct(num);
 
-		pmx_joint_buffer<char_type, CharBufferSize> buffer{};
+		joint_buffer<char_type, CharBufferSize> buffer{};
 
 		for(std::size_t i = 0; i < static_cast<std::size_t>(num); i++)
 		{

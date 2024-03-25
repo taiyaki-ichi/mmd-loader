@@ -3,12 +3,12 @@
 #include<istream>
 #include"loader_traits.hpp"
 
-namespace mmdl
+namespace mmdl::vmd
 {
-	template<typename T, typename traits = vmd_header_traits<T>>
-	T load_vmd_header(std::istream& in)
+	template<typename T, typename traits = header_traits<T>>
+	T load_header(std::istream& in)
 	{
-		vmd_header_buffer buffer{};
+		header_buffer buffer{};
 
 		// マジックナンバー
 		char magic[30];
@@ -24,12 +24,12 @@ namespace mmdl
 		return traits::construct(buffer);
 	}
 
-	template<typename T, typename traits = vmd_frame_data_traits<T>>
-	T load_vmd_frame_data(std::istream& in, std::size_t size)
+	template<typename T, typename traits = frame_data_traits<T>>
+	T load_frame_data(std::istream& in, std::size_t size)
 	{
 		auto result = traits::construct(size);
 
-		vmd_frame_data_buffer buffer{};
+		frame_buffer buffer{};
 
 		for (std::size_t i = 0; i < size; i++)
 		{
@@ -56,15 +56,15 @@ namespace mmdl
 		return result;
 	}
 
-	template<typename T, typename traits = vmd_morph_data_traits<T>>
-	T load_vmd_morph_data(std::istream& in)
+	template<typename T, typename traits = morph_data_traits<T>>
+	T load_morph_data(std::istream& in)
 	{
 		std::uint32_t size{};
 		read_from_istream(in, &size);
 
 		auto result = traits::construct(size);
 
-		vmd_morph_data_buffer buffer{};
+		morph_buffer buffer{};
 
 		for (std::size_t i = 0; i < size; i++)
 		{
